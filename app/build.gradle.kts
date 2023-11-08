@@ -33,6 +33,7 @@ android {
         }
     }
     compileOptions {
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
@@ -86,7 +87,10 @@ dependencies {
     implementation("androidx.room:room-ktx:2.6.0")
 
     // Material3
-    implementation ("androidx.compose.material3:material3:1.1.2")
+    implementation ("androidx.compose.material3:material3:1.2.0-alpha10")
+
+    // Desugaring
+    coreLibraryDesugaring ("com.android.tools:desugar_jdk_libs:2.0.4")
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
