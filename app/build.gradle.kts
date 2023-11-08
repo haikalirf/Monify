@@ -87,7 +87,7 @@ dependencies {
     implementation("androidx.room:room-ktx:2.6.0")
 
     // Material3
-    implementation ("androidx.compose.material3:material3:1.2.0-alpha10")
+    implementation ("androidx.compose.material3:material3:1.1.2")
 
     // Desugaring
     coreLibraryDesugaring ("com.android.tools:desugar_jdk_libs:2.0.4")

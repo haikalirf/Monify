@@ -19,8 +19,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.pager.HorizontalPager
@@ -28,6 +30,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.DatePickerDialog
@@ -60,16 +63,17 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.PopupProperties
-import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import com.bleh.monify.R
 import com.bleh.monify.core.ui_components.AccentedButton
 import com.bleh.monify.core.ui_components.SelectionBar
 import com.bleh.monify.core.ui_components.TabTitle
 import com.bleh.monify.feature_book.BookViewModel
+import com.bleh.monify.feature_book.TransferWallet
 import com.bleh.monify.ui.theme.Accent
 import com.bleh.monify.ui.theme.Grey
 import kotlinx.coroutines.launch
@@ -149,14 +153,13 @@ fun AddBookScreen(
                 when (it) {
                     0 -> TransactionCard(viewModel = viewModel, transactionType = TransactionType.INCOME)
                     1 -> TransactionCard(viewModel = viewModel, transactionType = TransactionType.OUTCOME)
-                    2 -> TransactionCard(viewModel = viewModel, transactionType = TransactionType.TRANSFER)
+                    2 -> TransferCard(viewModel = viewModel, transactionType = TransactionType.TRANSFER)
                 }
             }
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TransactionCard(
     viewModel: BookViewModel,
@@ -260,13 +263,132 @@ fun TransactionCard(
                     text = "Makanan & Minuman",
                     isSelected = it == state.selectedCategory
                 ) {
-                    viewModel.updateSelectedItem(it)
+                    viewModel.updateSelectedCategory(it)
                 }
             }
             items(4) {
                 Spacer(modifier = Modifier.size(20.dp))
             }
         }
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceAround,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 20.dp)
+        ) {
+            AccentedButton(
+                onClick = { /*TODO*/ },
+                text = "Kembali",
+                modifier = Modifier
+                    .size(160.dp, 50.dp)
+            )
+            AccentedButton(
+                onClick = { /*TODO*/ },
+                text = "Tambah",
+                modifier = Modifier
+                    .size(160.dp, 50.dp)
+            )
+        }
+    }
+}
+
+@Composable
+fun TransferCard(
+    viewModel: BookViewModel,
+    transactionType: TransactionType,
+    modifier: Modifier = Modifier
+) {
+    val state by viewModel.state.collectAsState()
+    val note = state.note
+    val nominal = state.nominal
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(top = 20.dp)
+            .clip(RoundedCornerShape(topStart = 40.dp, topEnd = 40.dp))
+            .background(Color.White)
+            .padding(horizontal = 15.dp, vertical = 20.dp)
+    ) {
+        Text(
+            text = "Catatan " + if (state.transactionType == 0) "Pemasukan" else "Pengeluaran",
+            style = MaterialTheme.typography.bodyLarge,
+        )
+        OutlinedTextField(
+            value = note,
+            onValueChange = {
+                viewModel.updateNoteState(it)
+            },
+            shape = RoundedCornerShape(30.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                unfocusedBorderColor = Color.Black,
+            ),
+            textStyle = MaterialTheme.typography.bodyMedium.copy(
+                platformStyle = PlatformTextStyle(
+                    includeFontPadding = false
+                )
+            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(55.dp)
+                .padding(bottom = 5.dp)
+        )
+        Text(
+            text = "Nominal",
+            style = MaterialTheme.typography.bodyLarge,
+        )
+        OutlinedTextField(
+            value = nominal,
+            onValueChange = {
+                viewModel.updateNominalState(it)
+            },
+            shape = RoundedCornerShape(30.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                unfocusedBorderColor = Color.Black,
+            ),
+            textStyle = MaterialTheme.typography.bodyMedium.copy(
+                platformStyle = PlatformTextStyle(
+                    includeFontPadding = false
+                )
+            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(55.dp)
+                .padding(bottom = 5.dp)
+        )
+        Text(
+            text = "Tanggal",
+            style = MaterialTheme.typography.bodyLarge,
+        )
+        DatePickerComposable(
+            viewModel = viewModel,
+            transactionType = transactionType
+        )
+        TransferWalletComposable(viewModel = viewModel)
+        Text(
+            text = "Biaya Admin",
+            style = MaterialTheme.typography.bodyLarge,
+        )
+        OutlinedTextField(
+            value = nominal,
+            onValueChange = {
+                viewModel.updateNominalState(it)
+            },
+            shape = RoundedCornerShape(30.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                unfocusedBorderColor = Color.Black,
+            ),
+            textStyle = MaterialTheme.typography.bodyMedium.copy(
+                platformStyle = PlatformTextStyle(
+                    includeFontPadding = false
+                )
+            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(55.dp)
+                .padding(bottom = 5.dp)
+        )
+        Spacer(modifier = Modifier.weight(1f))
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceAround,
@@ -384,6 +506,275 @@ fun DatePickerComposable(
     }
 }
 
+@Composable
+fun TransferWalletComposable(
+    viewModel: BookViewModel,
+) {
+    val state by viewModel.state.collectAsState()
+    val walletList = listOf<TransferWallet>(
+        TransferWallet(
+            icon = R.drawable.bca,
+            name = "BCA",
+            nominal = "Rp 1,000,000.00"
+        ),
+        TransferWallet(
+            icon = R.drawable.dana,
+            name = "Dana",
+            nominal = "Rp 3,000,000.00"
+        ),
+        TransferWallet(
+            icon = R.drawable.gopay,
+            name = "Gopay",
+            nominal = "Rp 500,000.00"
+        ),
+        TransferWallet(
+            icon = R.drawable.ic_wallet,
+            name = "Dompet",
+            nominal = "Rp 1,000,000.00"
+        ),
+        TransferWallet(
+            icon = R.drawable.ic_wallet,
+            name = "Dompet",
+            nominal = "Rp 1,000,000.00"
+        ),
+        TransferWallet(
+            icon = R.drawable.ic_wallet,
+            name = "Dompet",
+            nominal = "Rp 1,000,000.00"
+        ),
+        TransferWallet(
+            icon = R.drawable.ic_wallet,
+            name = "Dompet",
+            nominal = "Rp 1,000,000.00"
+        ),
+    )
+    Row(
+        verticalAlignment = Alignment.Bottom,
+        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 5.dp)
+    ) {
+        Column(
+            verticalArrangement = Arrangement.Bottom,
+            horizontalAlignment = Alignment.Start,
+            modifier = Modifier
+                .height(70.dp)
+                .width(160.dp)
+        ) {
+            Text(
+                text = "Dompet Asal",
+                style = MaterialTheme.typography.bodyLarge,
+            )
+            TransferWalletDropDown(
+                wallet = state.walletSource,
+                isExpanded = state.isWalletSourceExpanded,
+                walletList = walletList,
+                onExpandedChange = {
+                    viewModel.updateWalletSourceExpanded(it)
+                },
+                onWalletSelected = {
+                    viewModel.updateWalletSource(it)
+                },
+            )
+        }
+        Icon(
+            painter = painterResource(id = R.drawable.ic_arrow_right),
+            contentDescription = "Right Arrow",
+            modifier = Modifier
+                .size(24.dp)
+                .offset(y = (-12).dp)
+        )
+        Column(
+            verticalArrangement = Arrangement.Bottom,
+            horizontalAlignment = Alignment.Start,
+            modifier = Modifier
+                .height(70.dp)
+                .width(160.dp)
+        ) {
+            Text(
+                text = "Dompet Tujuan",
+                style = MaterialTheme.typography.bodyLarge,
+            )
+            TransferWalletDropDown(
+                wallet = state.walletDestination,
+                isExpanded = state.isWalletDestinationExpanded,
+                walletList = walletList,
+                onExpandedChange = {
+                    viewModel.updateWalletDestinationExpanded(it)
+                },
+                onWalletSelected = {
+                    viewModel.updateWalletDestination(it)
+                },
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TransferWalletDropDown(
+    wallet: TransferWallet?,
+    isExpanded: Boolean,
+    modifier: Modifier = Modifier,
+    walletList: List<TransferWallet> = listOf(),
+    onExpandedChange: (Boolean) -> Unit,
+    onWalletSelected: (TransferWallet) -> Unit
+) {
+    ExposedDropdownMenuBox(
+        expanded = isExpanded,
+        onExpandedChange = {
+            onExpandedChange(it)
+        },
+        modifier = modifier
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(55.dp)
+                .padding(horizontal = 5.dp)
+                .border(
+                    width = 1.dp,
+                    color = Color.Black,
+                    shape = RoundedCornerShape(30.dp)
+                )
+                .menuAnchor()
+        ) {
+            if (wallet == null) {
+                Text(
+                    text = "Pilih Dompet",
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                )
+            } else {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Start,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 10.dp)
+                ) {
+                    Image(
+                        painter = painterResource(id = wallet.icon),
+                        contentDescription = "wallet",
+                        modifier = Modifier
+                            .size(24.dp)
+                    )
+                    Column(
+                        horizontalAlignment = Alignment.Start,
+                        verticalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier
+                            .padding(start = 10.dp)
+                    ) {
+                        Text(
+                            text = wallet.name,
+                            style = MaterialTheme.typography.bodyMedium,
+                            textAlign = TextAlign.Start,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        )
+                        Text(
+                            text = wallet.nominal,
+                            style = MaterialTheme.typography.bodySmall,
+                            textAlign = TextAlign.Start,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        )
+                    }
+                }
+            }
+            Icon(
+                painter = painterResource(id = if (isExpanded) R.drawable.ic_arrow_drop_up else R.drawable.ic_arrow_drop_down),
+                contentDescription = "Dropdown",
+                modifier = Modifier
+                    .size(24.dp)
+            )
+        }
+        MaterialTheme(
+            shapes = MaterialTheme.shapes.copy(
+                extraSmall = RoundedCornerShape(24.dp)
+            )
+        ) {
+            DropdownMenu(
+                expanded = isExpanded,
+                onDismissRequest = { onExpandedChange(false) },
+                properties = PopupProperties(
+                    focusable = true,
+                    dismissOnClickOutside = true,
+                    dismissOnBackPress = true
+                ),
+                offset = DpOffset(x = 5.dp, y = 0.dp),
+                modifier = Modifier
+                    .exposedDropdownSize()
+                    .background(Color.White)
+                    .border(
+                        width = 1.dp,
+                        color = Color.Black,
+                        shape = RoundedCornerShape(24.dp)
+                    )
+                    .height(180.dp)
+            ) {
+                walletList.forEach { walletIt ->
+                    TransferWalletDropDownItem(wallet = walletIt) {
+                        onWalletSelected(walletIt)
+                        onExpandedChange(false)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun TransferWalletDropDownItem(
+    wallet: TransferWallet,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center,
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable {
+                onClick()
+            }
+            .padding(horizontal = 10.dp)
+    ) {
+        Image(
+            painter = painterResource(id = wallet.icon),
+            contentDescription = "wallet",
+            modifier = Modifier
+                .size(24.dp)
+        )
+        Column(
+            horizontalAlignment = Alignment.Start,
+            verticalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier
+                .padding(start = 10.dp)
+        ) {
+            Text(
+                text = wallet.name,
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Start,
+                modifier = Modifier
+                    .fillMaxWidth()
+            )
+            Text(
+                text = wallet.nominal,
+                style = MaterialTheme.typography.bodySmall,
+                textAlign = TextAlign.Start,
+                modifier = Modifier
+                    .fillMaxWidth()
+            )
+        }
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WalletDropDown(
@@ -425,7 +816,6 @@ fun WalletDropDown(
                 .height(55.dp)
                 .padding(bottom = 5.dp)
                 .menuAnchor()
-                .zIndex(2f)
         )
         MaterialTheme(
             shapes = MaterialTheme.shapes.copy(
@@ -442,7 +832,7 @@ fun WalletDropDown(
                     dismissOnClickOutside = true,
                     dismissOnBackPress = true
                 ),
-                offset = DpOffset(x = 0.dp, y = (-55).dp),
+//                offset = DpOffset(x = 0.dp, y = (-55).dp),
                 modifier = Modifier
                     .exposedDropdownSize()
                     .background(Color.White)
@@ -452,9 +842,8 @@ fun WalletDropDown(
                         color = Color.Black,
                         shape = RoundedCornerShape(24.dp)
                     )
-                    .zIndex(1f)
             ) {
-                DropdownMenuItem(text = {}, onClick = {}, modifier = Modifier.height(55.dp))
+//                DropdownMenuItem(text = {}, onClick = {}, modifier = Modifier.height(55.dp))
                 WalletDropDownItem(
                     viewModel = viewModel,
                     icon = R.drawable.bca,
@@ -547,7 +936,6 @@ fun WalletDropDownItem(
         },
         modifier = Modifier
             .fillMaxWidth()
-            .zIndex(1f)
     )
 }
 
@@ -588,7 +976,7 @@ fun CategoryItem(
     }
 }
 
-//@Preview(showSystemUi = true)
+@Preview(showSystemUi = true)
 @Composable
 fun PreviewAddBookScreen() {
     AddBookScreen(

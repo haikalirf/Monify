@@ -18,9 +18,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -198,6 +198,7 @@ fun BookList(
             item {
                 BookListPerDay(viewModel = viewModel)
                 BookListPerDay(viewModel = viewModel)
+                BookListPerDay(viewModel = viewModel)
                 Spacer(modifier = Modifier.height(paddingBottom+85.dp))
             }
         }
@@ -361,7 +362,7 @@ fun BookListItem(
             )
         }
     }
-    HorizontalDivider(
+    Divider(
         modifier = Modifier
             .fillMaxWidth(),
         color = Color.Black

@@ -9,6 +9,12 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
+data class TransferWallet(
+    val icon: Int,
+    val name: String,
+    val nominal: String,
+)
+
 data class BookState(
     val searchState: String = "",
     val note: String = "",
@@ -17,9 +23,13 @@ data class BookState(
     val formattedDate: String = "",
     val showDatePicker: Boolean = false,
     val wallet: String = "",
-    val transactionType: Int = 1,
-    val selectedCategory: Int = 0,
     val isWalletExpanded: Boolean = false,
+    val transactionType: Int = 1,
+    val selectedCategory: Int = 1,
+    val walletSource: TransferWallet? = null,
+    val walletDestination: TransferWallet? = null,
+    val isWalletSourceExpanded: Boolean = false,
+    val isWalletDestinationExpanded: Boolean = false,
 )
 
 @HiltViewModel
@@ -80,7 +90,7 @@ class BookViewModel @Inject constructor(
         }
     }
 
-    fun updateSelectedItem (index: Int) {
+    fun updateSelectedCategory (index: Int) {
         _state.update {
             it.copy(selectedCategory = index)
         }
@@ -89,6 +99,30 @@ class BookViewModel @Inject constructor(
     fun updateWalletExpanded (isExpanded: Boolean) {
         _state.update {
             it.copy(isWalletExpanded = isExpanded)
+        }
+    }
+
+    fun updateWalletSource (wallet: TransferWallet) {
+        _state.update {
+            it.copy(walletSource = wallet)
+        }
+    }
+
+    fun updateWalletDestination (wallet: TransferWallet) {
+        _state.update {
+            it.copy(walletDestination = wallet)
+        }
+    }
+
+    fun updateWalletSourceExpanded (isExpanded: Boolean) {
+        _state.update {
+            it.copy(isWalletSourceExpanded = isExpanded)
+        }
+    }
+
+    fun updateWalletDestinationExpanded (isExpanded: Boolean) {
+        _state.update {
+            it.copy(isWalletDestinationExpanded = isExpanded)
         }
     }
 
@@ -102,8 +136,12 @@ class BookViewModel @Inject constructor(
                 formattedDate = "",
                 showDatePicker = false,
                 wallet = "",
-                selectedCategory = 0,
                 isWalletExpanded = false,
+                selectedCategory = 0,
+                walletSource = null,
+                walletDestination = null,
+                isWalletSourceExpanded = false,
+                isWalletDestinationExpanded = false,
             )
         }
     }

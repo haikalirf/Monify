@@ -65,7 +65,7 @@ class MainActivity : ComponentActivity() {
                             RegisterScreen(navController = navController, viewModel = viewModel)
                         }
                     }
-                    navigation(startDestination = "book_add", route = "book") {
+                    navigation(startDestination = "book_main", route = "book") {
                         composable("book_main") {
                             val viewModel = it.sharedViewModel<BookViewModel>(navController)
                             BookScreen(navController = navController, viewModel = viewModel)
