@@ -832,7 +832,7 @@ fun WalletDropDown(
                     dismissOnClickOutside = true,
                     dismissOnBackPress = true
                 ),
-//                offset = DpOffset(x = 0.dp, y = (-55).dp),
+                offset = DpOffset(x = 0.dp, y = (-5).dp),
                 modifier = Modifier
                     .exposedDropdownSize()
                     .background(Color.White)
