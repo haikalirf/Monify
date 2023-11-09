@@ -15,14 +15,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -50,6 +48,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.bleh.monify.R
+import com.bleh.monify.core.ui_components.BottomBar
+import com.bleh.monify.core.ui_components.FloatingAddButton
 import com.bleh.monify.feature_book.BookViewModel
 import com.bleh.monify.ui.theme.Accent
 import com.bleh.monify.ui.theme.AccentLight
@@ -59,21 +59,18 @@ import com.bleh.monify.ui.theme.Red
 @Composable
 fun BookScreen(
     navController: NavController,
-    viewModel: BookViewModel
+    viewModel: BookViewModel,
 ) {
-    val state by viewModel.state.collectAsState()
-    val focusManager = LocalFocusManager.current
-    val coroutineScope = rememberCoroutineScope()
     Scaffold(
         floatingActionButton = {
-            AddButton {
+            FloatingAddButton {
                 navController.navigate("book_add")
             }
         },
         bottomBar = {
             BottomBar(
                 navController = navController,
-                viewModel = viewModel
+                bottomBarState = 0
             )
         },
         containerColor = Color.Transparent,
@@ -99,7 +96,6 @@ fun BookScreen(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchBar(
     viewModel: BookViewModel,
@@ -369,110 +365,11 @@ fun BookListItem(
     )
 }
 
-@Composable
-fun AddButton(
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit
-) {
-    FloatingActionButton(
-        onClick = onClick,
-        shape = CircleShape,
-        containerColor = Accent,
-        contentColor = Color.Black,
-        modifier = modifier
-            .size(70.dp)
-    ) {
-        Icon(
-            painter = painterResource(id = R.drawable.ic_add),
-            contentDescription = "Add Icon"
-        )
-    }
-}
-
-@Composable
-fun BottomBar(
-    navController: NavController,
-    viewModel: BookViewModel,
-    modifier: Modifier = Modifier
-) {
-    BottomAppBar(
-        containerColor = Accent,
-        modifier = Modifier
-            .clip(RoundedCornerShape(topStart = 40.dp, topEnd = 40.dp))
-    ) {
-        Row (
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 20.dp)
-        ) {
-            BottomBarItem(
-                icon = R.drawable.ic_book,
-                text = "Buku",
-                color = Color.White,
-                onClick = {
-                    //TODO
-                }
-            )
-            BottomBarItem(
-                icon = R.drawable.ic_wallet,
-                text = "Dompet",
-                onClick = {
-                    //TODO
-                }
-            )
-            BottomBarItem(
-                icon = R.drawable.ic_analysis,
-                text = "Analisis",
-                onClick = {
-                    //TODO
-                }
-            )
-            BottomBarItem(
-                icon = R.drawable.ic_more,
-                text = "Lebih",
-                onClick = {
-                    //TODO
-                }
-            )
-        }
-    }
-}
-
-@Composable
-fun BottomBarItem (
-    icon: Int,
-    text: String,
-    modifier: Modifier = Modifier,
-    color: Color = Color.Black,
-    onClick: () -> Unit
-) {
-    Column(
-        verticalArrangement = Arrangement.Bottom,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier
-    ) {
-        IconButton(onClick = onClick) {
-            Icon(
-                painter = painterResource(id = icon),
-                contentDescription = text,
-                tint = color
-            )
-        }
-        Text(
-            text = text,
-            style = MaterialTheme.typography.labelLarge,
-            color = color
-        )
-    }
-}
-
 //@Preview(showSystemUi = true)
 @Composable
 fun BookScreenPreview() {
     BookScreen(
         navController = NavController(LocalContext.current),
-        viewModel = BookViewModel()
+        viewModel = BookViewModel(),
     )
 }

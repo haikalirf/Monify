@@ -10,6 +10,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -35,6 +37,8 @@ import com.bleh.monify.feature_auth.register.RegisterScreen
 import com.bleh.monify.feature_book.BookViewModel
 import com.bleh.monify.feature_book.book.BookScreen
 import com.bleh.monify.feature_book.editor.AddBookScreen
+import com.bleh.monify.feature_wallet.WalletViewModel
+import com.bleh.monify.feature_wallet.wallet.WalletScreen
 import com.bleh.monify.ui.theme.MonifyTheme
 import com.google.android.gms.auth.api.identity.Identity
 import dagger.hilt.android.AndroidEntryPoint
@@ -52,8 +56,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            val navController = rememberNavController()
             MonifyTheme {
-                val navController = rememberNavController()
                 NavHost(navController = navController, startDestination = "book") {
                     navigation(startDestination = "login", route = "auth") {
                         composable(route = "login",) {
@@ -77,17 +81,22 @@ class MainActivity : ComponentActivity() {
                     }
                     navigation(startDestination = "wallet_main", route = "wallet") {
                         composable("wallet_main") {
-
+                            val viewModel = it.sharedViewModel<WalletViewModel>(navController = navController)
+                            WalletScreen(navController = navController, viewModel = viewModel)
+                        }
+                        composable("wallet_add") {
+                            val viewModel = it.sharedViewModel<WalletViewModel>(navController = navController)
+//                            WalletAddScreen(navController = navController, viewModel = viewModel)
                         }
                     }
                     navigation(startDestination = "analysis_main", route = "analysis") {
                         composable("analysis_main") {
-
+                            Text(text = "Analysis")
                         }
                     }
-                    navigation(startDestination = "settings_main", route = "settings") {
-                        composable("settings_main") {
-
+                    navigation(startDestination = "more_main", route = "more") {
+                        composable("more_main") {
+                            Text(text = "More")
                         }
                     }
                 }
