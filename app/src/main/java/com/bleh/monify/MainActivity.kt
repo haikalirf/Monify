@@ -1,48 +1,40 @@
 package com.bleh.monify
 
 import android.os.Bundle
-import android.view.Window
-import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.core.graphics.Insets
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
+import com.bleh.monify.feature_analysis.AnalysisViewModel
+import com.bleh.monify.feature_analysis.analysis.AnalysisScreen
 import com.bleh.monify.feature_auth.AuthViewModel
 import com.bleh.monify.feature_auth.GoogleAuthUiClient
 import com.bleh.monify.feature_auth.login.LoginScreen
 import com.bleh.monify.feature_auth.register.RegisterScreen
 import com.bleh.monify.feature_book.BookViewModel
 import com.bleh.monify.feature_book.book.BookScreen
-import com.bleh.monify.feature_book.editor.AddBookScreen
+import com.bleh.monify.feature_book.add.AddBookScreen
+import com.bleh.monify.feature_more.budget.BudgetViewModel
+import com.bleh.monify.feature_more.budget.budget.BudgetScreen
+import com.bleh.monify.feature_more.category.AddCategoryScreen
+import com.bleh.monify.feature_more.category.CategoryScreen
+import com.bleh.monify.feature_more.category.CategoryViewModel
+import com.bleh.monify.feature_more.more.MoreViewModel
+import com.bleh.monify.feature_more.more.MoreScreen
 import com.bleh.monify.feature_wallet.WalletViewModel
+import com.bleh.monify.feature_wallet.add.AddWalletScreen
 import com.bleh.monify.feature_wallet.wallet.WalletScreen
 import com.bleh.monify.ui.theme.MonifyTheme
 import com.google.android.gms.auth.api.identity.Identity
 import dagger.hilt.android.AndroidEntryPoint
-import dagger.hilt.android.HiltAndroidApp
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -86,17 +78,35 @@ class MainActivity : ComponentActivity() {
                         }
                         composable("wallet_add") {
                             val viewModel = it.sharedViewModel<WalletViewModel>(navController = navController)
-//                            WalletAddScreen(navController = navController, viewModel = viewModel)
+                            AddWalletScreen(navController = navController, viewModel = viewModel)
                         }
                     }
                     navigation(startDestination = "analysis_main", route = "analysis") {
                         composable("analysis_main") {
-                            Text(text = "Analysis")
+                            val viewModel = it.sharedViewModel<AnalysisViewModel>(navController = navController)
+                            AnalysisScreen(navController = navController, viewModel = viewModel)
                         }
                     }
                     navigation(startDestination = "more_main", route = "more") {
                         composable("more_main") {
-                            Text(text = "More")
+                            val viewModel = it.sharedViewModel<MoreViewModel>(navController = navController)
+                            MoreScreen(navController = navController, viewModel = viewModel)
+                        }
+                        navigation(startDestination = "category_main", route = "category") {
+                            composable("category_main") {
+                                val viewModel = it.sharedViewModel<CategoryViewModel>(navController = navController)
+                                CategoryScreen(navController = navController, viewModel = viewModel)
+                            }
+                            composable("category_add") {
+                                val viewModel = it.sharedViewModel<CategoryViewModel>(navController = navController)
+                                AddCategoryScreen(navController = navController, viewModel = viewModel)
+                            }
+                        }
+                        navigation(startDestination = "budget_main", route = "budget") {
+                            composable("budget_main") {
+                                val viewModel = it.sharedViewModel<BudgetViewModel>(navController = navController)
+                                BudgetScreen(navController = navController, viewModel = viewModel)
+                            }
                         }
                     }
                 }

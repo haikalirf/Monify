@@ -24,8 +24,9 @@ data class BookState(
     val showDatePicker: Boolean = false,
     val wallet: String = "",
     val isWalletExpanded: Boolean = false,
+    val admin: String = "",
     val transactionType: Int = 1,
-    val selectedCategory: Int = 1,
+    val selectedCategory: Int = 0,
     val walletSource: TransferWallet? = null,
     val walletDestination: TransferWallet? = null,
     val isWalletSourceExpanded: Boolean = false,
@@ -102,6 +103,12 @@ class BookViewModel @Inject constructor(
         }
     }
 
+    fun updateAdminState (admin: String) {
+        _state.update {
+            it.copy(admin = admin)
+        }
+    }
+
     fun updateWalletSource (wallet: TransferWallet) {
         _state.update {
             it.copy(walletSource = wallet)
@@ -137,6 +144,7 @@ class BookViewModel @Inject constructor(
                 showDatePicker = false,
                 wallet = "",
                 isWalletExpanded = false,
+                admin = "",
                 selectedCategory = 0,
                 walletSource = null,
                 walletDestination = null,

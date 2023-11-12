@@ -147,10 +147,10 @@ fun Modifier.tabIndicator(
 
 @Composable
 fun TabTitle(
-    title: String,
     icon: Int,
     position: Int,
     modifier : Modifier = Modifier,
+    title: String? = null,
     textColor: Color = Color.White,
     onClick: (Int) -> Unit
 ) {
@@ -168,7 +168,8 @@ fun TabTitle(
             contentDescription = title,
             modifier = Modifier
         )
-//        if (currentIndex == position) {
+        //if title is not null
+        if (title != null) {
             Text(
                 text = title,
                 Modifier
@@ -176,52 +177,6 @@ fun TabTitle(
                     .padding(horizontal = 8.dp, vertical = 4.dp),
                 color = textColor
             )
-//        }
+        }
     }
 }
-
-//@Composable
-//fun TabTitle(
-//    title: String,
-//    icon: Int,
-//    position: Int,
-//    currentIndex: Int,
-//    modifier: Modifier = Modifier,
-//    textColor: Color = Color.White,
-//    animationSpec: AnimationSpec<Float> = tween(durationMillis = 250, easing = FastOutSlowInEasing),
-//    onClick: (Int) -> Unit
-//) {
-//    val textWidth = remember { Animatable(1f) }
-//
-//    Row(
-//        horizontalArrangement = Arrangement.Center,
-//        verticalAlignment = Alignment.CenterVertically,
-//        modifier = modifier
-//            .clickable(
-//                interactionSource = remember { MutableInteractionSource() },
-//                indication = null,
-//            ) {
-//                onClick(position)
-//            },
-//    ) {
-//        Icon(
-//            painter = painterResource(id = icon),
-//            contentDescription = title,
-//            modifier = Modifier
-//                .wrapContentSize(Alignment.Center)
-//        )
-//
-//        LaunchedEffect(currentIndex) {
-//            textWidth.animateTo(if (currentIndex == position) 1f else 0f, animationSpec)
-//        }
-//
-//        Text(
-//            text = title,
-//            Modifier
-//                .wrapContentWidth(Alignment.CenterHorizontally)
-//                .padding(horizontal = 8.dp, vertical = 4.dp)
-//                .widthIn(max = Dp.Infinity * textWidth.value), // Adjust the maximum width as needed
-//            color = textColor
-//        )
-//    }
-//}

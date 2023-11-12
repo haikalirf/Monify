@@ -15,3 +15,8 @@ val AccentLight = Color(0xFFB6EAFF)
 val Red = Color(0xFFFF0000)
 val Green = Color(0xFF05C919)
 val Grey = Color(0xFFD9D9D9)
+
+// pie chart colors
+val Pie1 = Color(0xFFE0E0FF)
+val Pie2 = Color(0xFFB6EAFF)
+val Pie3 = Color(0xFFF9F3CC)

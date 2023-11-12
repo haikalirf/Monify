@@ -1,4 +1,4 @@
-package com.bleh.monify.feature_book.editor
+package com.bleh.monify.feature_book.add
 
 import android.annotation.SuppressLint
 import androidx.compose.animation.core.AnimationSpec
@@ -30,7 +30,6 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.DatePickerDialog
@@ -63,7 +62,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.PopupProperties
@@ -151,9 +149,9 @@ fun AddBookScreen(
                 beyondBoundsPageCount = 2
             ) {
                 when (it) {
-                    0 -> TransactionCard(viewModel = viewModel, transactionType = TransactionType.INCOME)
-                    1 -> TransactionCard(viewModel = viewModel, transactionType = TransactionType.OUTCOME)
-                    2 -> TransferCard(viewModel = viewModel, transactionType = TransactionType.TRANSFER)
+                    0 -> TransactionCard(viewModel = viewModel, transactionType = TransactionType.INCOME, navController = navController)
+                    1 -> TransactionCard(viewModel = viewModel, transactionType = TransactionType.OUTCOME, navController = navController)
+                    2 -> TransferCard(viewModel = viewModel, transactionType = TransactionType.TRANSFER, navController = navController)
                 }
             }
         }
@@ -164,6 +162,7 @@ fun AddBookScreen(
 fun TransactionCard(
     viewModel: BookViewModel,
     transactionType: TransactionType,
+    navController: NavController,
     modifier: Modifier = Modifier
 ) {
     val state by viewModel.state.collectAsState()
@@ -243,33 +242,11 @@ fun TransactionCard(
             text = "Kategori",
             style = MaterialTheme.typography.bodyLarge,
         )
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(4),
+        CategoryGrid(
+            viewModel = viewModel,
             modifier = Modifier
                 .weight(1f)
-                .border(
-                    width = 1.dp,
-                    color = Color.Black,
-                    shape = RoundedCornerShape(30.dp)
-                )
-                .padding(horizontal = 20.dp)
-        ) {
-            items(4) {
-                Spacer(modifier = Modifier.size(20.dp))
-            }
-            items(20) {
-                CategoryItem(
-                    icon = R.drawable.ic_paper_checkmark,
-                    text = "Makanan & Minuman",
-                    isSelected = it == state.selectedCategory
-                ) {
-                    viewModel.updateSelectedCategory(it)
-                }
-            }
-            items(4) {
-                Spacer(modifier = Modifier.size(20.dp))
-            }
-        }
+        )
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceAround,
@@ -278,7 +255,13 @@ fun TransactionCard(
                 .padding(top = 20.dp)
         ) {
             AccentedButton(
-                onClick = { /*TODO*/ },
+                onClick = {
+                    navController.navigate("book_main") {
+                        popUpTo("book_main") {
+                            inclusive = true
+                        }
+                    }
+                },
                 text = "Kembali",
                 modifier = Modifier
                     .size(160.dp, 50.dp)
@@ -297,11 +280,13 @@ fun TransactionCard(
 fun TransferCard(
     viewModel: BookViewModel,
     transactionType: TransactionType,
+    navController: NavController,
     modifier: Modifier = Modifier
 ) {
     val state by viewModel.state.collectAsState()
     val note = state.note
     val nominal = state.nominal
+    val admin = state.admin
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -311,7 +296,7 @@ fun TransferCard(
             .padding(horizontal = 15.dp, vertical = 20.dp)
     ) {
         Text(
-            text = "Catatan " + if (state.transactionType == 0) "Pemasukan" else "Pengeluaran",
+            text = "Catatan Transfer",
             style = MaterialTheme.typography.bodyLarge,
         )
         OutlinedTextField(
@@ -370,9 +355,9 @@ fun TransferCard(
             style = MaterialTheme.typography.bodyLarge,
         )
         OutlinedTextField(
-            value = nominal,
+            value = admin,
             onValueChange = {
-                viewModel.updateNominalState(it)
+                viewModel.updateAdminState(it)
             },
             shape = RoundedCornerShape(30.dp),
             colors = OutlinedTextFieldDefaults.colors(
@@ -397,7 +382,13 @@ fun TransferCard(
                 .padding(top = 20.dp)
         ) {
             AccentedButton(
-                onClick = { /*TODO*/ },
+                onClick = {
+                    navController.navigate("book_main") {
+                        popUpTo("book_main") {
+                            inclusive = true
+                        }
+                    }
+                },
                 text = "Kembali",
                 modifier = Modifier
                     .size(160.dp, 50.dp)
@@ -940,6 +931,40 @@ fun WalletDropDownItem(
 }
 
 @Composable
+fun CategoryGrid(
+    viewModel: BookViewModel,
+    modifier: Modifier = Modifier
+) {
+    val state by viewModel.state.collectAsState()
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(4),
+        modifier = modifier
+            .border(
+                width = 1.dp,
+                color = Color.Black,
+                shape = RoundedCornerShape(30.dp)
+            )
+            .padding(horizontal = 20.dp)
+    ) {
+        items(4) {
+            Spacer(modifier = Modifier.size(20.dp))
+        }
+        items(20) {
+            CategoryItem(
+                icon = R.drawable.ic_paper_checkmark,
+                text = "Makanan & Minuman",
+                isSelected = it == state.selectedCategory
+            ) {
+                viewModel.updateSelectedCategory(it)
+            }
+        }
+        items(4) {
+            Spacer(modifier = Modifier.size(20.dp))
+        }
+    }
+}
+
+@Composable
 fun CategoryItem(
     icon: Int,
     text: String,
@@ -976,7 +1001,7 @@ fun CategoryItem(
     }
 }
 
-@Preview(showSystemUi = true)
+//@Preview(showSystemUi = true)
 @Composable
 fun PreviewAddBookScreen() {
     AddBookScreen(
