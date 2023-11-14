@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -31,14 +30,12 @@ import com.bleh.monify.R
 import com.bleh.monify.core.ui_components.BottomBar
 import com.bleh.monify.core.ui_components.SelectionBar
 import com.bleh.monify.core.ui_components.TabTitle
-import com.bleh.monify.feature_analysis.AnalysisType
-import com.bleh.monify.feature_analysis.AnalysisViewModel
 import com.bleh.monify.feature_analysis.budget.AnalysisBudgetCard
 import com.bleh.monify.feature_analysis.budget.AnalysisBudgetViewModel
+import com.bleh.monify.feature_analysis.comparison.AnalysisComparisonCard
+import com.bleh.monify.feature_analysis.comparison.AnalysisComparisonViewModel
 import com.bleh.monify.feature_analysis.transaction.AnalysisTransactionViewModel
 import com.bleh.monify.feature_analysis.transaction.TransactionAnalysisCard
-import com.bleh.monify.feature_book.add.TransactionType
-import com.bleh.monify.feature_more.category.CategoryType
 import com.bleh.monify.ui.theme.Accent
 import kotlinx.coroutines.launch
 
@@ -73,7 +70,7 @@ fun AnalysisScreen(
                 0 -> AnalysisType.INCOME
                 1 -> AnalysisType.OUTCOME
                 2 -> AnalysisType.BUDGET
-                3 -> AnalysisType.Comparison
+                3 -> AnalysisType.COMPARISON
                 else -> AnalysisType.OUTCOME
             }
             viewModel.updateAnalysisType(analysisType)
@@ -104,7 +101,7 @@ fun AnalysisScreen(
                                 0 -> AnalysisType.INCOME
                                 1 -> AnalysisType.OUTCOME
                                 2 -> AnalysisType.BUDGET
-                                3 -> AnalysisType.Comparison
+                                3 -> AnalysisType.COMPARISON
                                 else -> AnalysisType.OUTCOME
                             }
                             viewModel.updateAnalysisType(analysisType)
@@ -136,13 +133,12 @@ fun AnalysisScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                 )
-                AnalysisType.Comparison -> Text("Comparison")
-//                AnalysisType.Comparison -> ComparisonAnalysisCard(
-//                    viewModel = viewModel,
-//                    modifier = Modifier
-//                        .padding(top = 20.dp)
-//                        .fillMaxWidth()
-//                )
+                AnalysisType.COMPARISON -> AnalysisComparisonCard(
+                    viewModel = AnalysisComparisonViewModel(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                )
             }
         }
     }

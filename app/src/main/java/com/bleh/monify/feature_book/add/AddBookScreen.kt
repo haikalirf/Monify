@@ -177,7 +177,7 @@ fun TransactionCard(
             .padding(horizontal = 15.dp, vertical = 20.dp)
     ) {
         Text(
-            text = "Catatan " + if (state.transactionType == 0) "Pemasukan" else "Pengeluaran",
+            text = "Catatan " + if (transactionType == TransactionType.INCOME) "Pemasukan" else "Pengeluaran",
             style = MaterialTheme.typography.bodyLarge,
         )
         OutlinedTextField(

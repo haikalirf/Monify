@@ -1,4 +1,4 @@
-package com.bleh.monify.feature_analysis
+package com.bleh.monify.feature_analysis.analysis
 
 import androidx.lifecycle.ViewModel
 import com.bleh.monify.R
@@ -12,7 +12,7 @@ enum class AnalysisType(val value: Int, val categoryName: String, val icon: Int)
     INCOME(0, "Pemasukan", R.drawable.ic_income),
     OUTCOME(1, "Pengeluaran", R.drawable.ic_outcome),
     BUDGET(2, "Anggaran", R.drawable.ic_budget),
-    Comparison(3, "Perbandingqan", R.drawable.ic_comparison)
+    COMPARISON(3, "Perbandingqan", R.drawable.ic_comparison)
 }
 
 data class AnalysisState(

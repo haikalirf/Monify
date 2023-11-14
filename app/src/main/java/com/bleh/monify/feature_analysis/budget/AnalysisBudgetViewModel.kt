@@ -2,7 +2,6 @@ package com.bleh.monify.feature_analysis.budget
 
 import androidx.lifecycle.ViewModel
 import com.bleh.monify.R
-import com.bleh.monify.feature_analysis.AnalysisType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow

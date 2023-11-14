@@ -38,7 +38,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.PlatformTextStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.PopupProperties
@@ -207,7 +206,7 @@ fun BudgetListItem(
     budget: Budget,
     modifier: Modifier = Modifier
 ) {
-    //TODO DO THIS FOR THE WHOLE APP
+    //TODO THIS FOR THE WHOLE APP
     val formatter: NumberFormat = indonesianFormatter()
     Column(
         verticalArrangement = Arrangement.Center,
@@ -251,7 +250,7 @@ fun BudgetListItem(
                 )
             }
         }
-        ProgressBar(
+        BudgetProgressBar(
             progress = (budget.used / budget.amount).toFloat(),
             modifier = Modifier
                 .fillMaxWidth()
@@ -296,7 +295,7 @@ fun BudgetListItem(
 }
 
 @Composable
-fun ProgressBar(
+fun BudgetProgressBar(
     progress: Float,
     modifier: Modifier = Modifier
 ) {

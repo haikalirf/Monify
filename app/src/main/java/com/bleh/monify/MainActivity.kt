@@ -13,7 +13,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
-import com.bleh.monify.feature_analysis.AnalysisViewModel
+import com.bleh.monify.feature_analysis.analysis.AnalysisViewModel
 import com.bleh.monify.feature_analysis.analysis.AnalysisScreen
 import com.bleh.monify.feature_auth.AuthViewModel
 import com.bleh.monify.feature_auth.GoogleAuthUiClient

@@ -1,9 +1,8 @@
 package com.bleh.monify.feature_analysis.transaction
 
-import android.health.connect.datatypes.units.Percentage
 import androidx.lifecycle.ViewModel
 import com.bleh.monify.R
-import com.bleh.monify.feature_analysis.AnalysisType
+import com.bleh.monify.feature_analysis.analysis.AnalysisType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
