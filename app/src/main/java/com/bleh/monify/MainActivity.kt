@@ -38,19 +38,12 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    private val googleAuthUiClient by lazy {
-        GoogleAuthUiClient(
-            context = applicationContext,
-            oneTapClient = Identity.getSignInClient(applicationContext)
-        )
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             val navController = rememberNavController()
             MonifyTheme {
-                NavHost(navController = navController, startDestination = "book") {
+                NavHost(navController = navController, startDestination = "auth") {
                     navigation(startDestination = "login", route = "auth") {
                         composable(route = "login",) {
                             val viewModel = it.sharedViewModel<AuthViewModel>(navController)

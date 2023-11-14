@@ -95,7 +95,9 @@ dependencies {
     // Vico
     implementation("com.patrykandpatrick.vico:compose:1.12.0")
     implementation("com.patrykandpatrick.vico:compose-m3:1.12.0")
-//    implementation("com.patrykandpatrick.vico:core:1.12.0")
+
+    // Shimmer
+    implementation("com.valentinilk.shimmer:compose-shimmer:1.2.0")
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")

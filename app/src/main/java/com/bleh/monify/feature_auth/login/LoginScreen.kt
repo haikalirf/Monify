@@ -68,12 +68,12 @@ fun LoginScreen(
     }
     LaunchedEffect(key1 = Unit) {
         viewModel.checkLogin()
-        if (state.isUserLoggedIn) {
+//        if (state.isUserLoggedIn) {
             navController.navigate("book_main") {
                 popUpTo("auth") {
                     inclusive = true
                 }
-            }
+//            }
         }
     }
     Scaffold(

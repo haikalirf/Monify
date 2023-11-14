@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
 data class WalletState(
+    val totalNominal: Double = 0.0,
     val walletName: String = "",
     val walletNominal: String = "",
     val selectedWallet: Int = 0,

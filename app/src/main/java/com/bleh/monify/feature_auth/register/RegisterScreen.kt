@@ -111,7 +111,7 @@ fun RegisterScreen(
                         start = offset,
                         end = offset
                     ).firstOrNull()?.let {
-                        navController.navigate("register")
+                        navController.navigate("login")
                         viewModel.resetState()
                     }
                 }
