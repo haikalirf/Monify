@@ -46,6 +46,7 @@ import com.bleh.monify.core.ui_components.AccentedButton
 import com.bleh.monify.core.ui_components.SelectionBar
 import com.bleh.monify.core.ui_components.TabTitle
 import com.bleh.monify.ui.theme.Accent
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
@@ -78,6 +79,12 @@ fun CategoryScreen(
             viewModel.updateCategoryType(categoryType)
         }
         val animationSpec: AnimationSpec<Float> = tween(durationMillis = 250, easing = FastOutSlowInEasing)
+        LaunchedEffect(state.categoryType) {
+            pagerState.animateScrollToPage(
+                page = state.categoryType.value,
+                animationSpec = animationSpec
+            )
+        }
         Column {
             Box(
                 contentAlignment = Alignment.Center,
@@ -106,12 +113,6 @@ fun CategoryScreen(
                                 else -> CategoryType.INCOME
                             }
                             viewModel.updateCategoryType(categoryType)
-                            coroutineScope.launch {
-                                pagerState.animateScrollToPage(
-                                    page = state.categoryType.value,
-                                    animationSpec = animationSpec
-                                )
-                            }
                         }
                     }
                 }

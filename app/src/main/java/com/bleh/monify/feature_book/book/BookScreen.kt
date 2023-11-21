@@ -1,5 +1,9 @@
 package com.bleh.monify.feature_book.book
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.Indication
+import androidx.compose.foundation.IndicationInstance
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -206,12 +210,6 @@ fun BookListPerDay(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 10.dp, vertical = 10.dp)
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null,
-            ) {
-                showList = !showList
-            }
     ) {
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -221,6 +219,12 @@ fun BookListPerDay(
                 .height(40.dp)
                 .clip(RoundedCornerShape(40.dp))
                 .background(AccentLight)
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = LocalIndication.current,
+                ) {
+                    showList = !showList
+                }
         ) {
             Text(
                 text = "11-01 Rabu",
@@ -244,7 +248,9 @@ fun BookListPerDay(
                     .padding(end = 20.dp)
             )
         }
-        if (showList) {
+        AnimatedVisibility(
+            visible = showList
+        ) {
             Column {
                 BookListItem(
                     viewModel = viewModel,

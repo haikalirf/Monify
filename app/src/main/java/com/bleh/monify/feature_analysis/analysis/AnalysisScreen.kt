@@ -7,10 +7,12 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -37,6 +39,7 @@ import com.bleh.monify.feature_analysis.comparison.AnalysisComparisonViewModel
 import com.bleh.monify.feature_analysis.transaction.AnalysisTransactionViewModel
 import com.bleh.monify.feature_analysis.transaction.TransactionAnalysisCard
 import com.bleh.monify.ui.theme.Accent
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -64,8 +67,9 @@ fun AnalysisScreen(
     ) {
         val pagerState = rememberPagerState(
             initialPage = 1,
-        ) { 2 }
+        ) { 4 }
         LaunchedEffect(pagerState.currentPage) {
+            delay(200)
             val analysisType = when (pagerState.currentPage) {
                 0 -> AnalysisType.INCOME
                 1 -> AnalysisType.OUTCOME
@@ -76,6 +80,12 @@ fun AnalysisScreen(
             viewModel.updateAnalysisType(analysisType)
         }
         val animationSpec: AnimationSpec<Float> = tween(durationMillis = 250, easing = FastOutSlowInEasing)
+        LaunchedEffect(state.analysisType) {
+            pagerState.animateScrollToPage(
+                page = state.analysisType.value,
+                animationSpec = animationSpec
+            )
+        }
         Column {
             Box(
                 contentAlignment = Alignment.Center,
@@ -105,40 +115,40 @@ fun AnalysisScreen(
                                 else -> AnalysisType.OUTCOME
                             }
                             viewModel.updateAnalysisType(analysisType)
-                            coroutineScope.launch {
-                                pagerState.animateScrollToPage(
-                                    page = state.analysisType.value,
-                                    animationSpec = animationSpec
-                                )
-                            }
                         }
                     }
                 }
             }
-            when (state.analysisType) {
-                AnalysisType.INCOME -> TransactionAnalysisCard(
-                    viewModel = AnalysisTransactionViewModel(),
-                    transactionType = AnalysisType.INCOME,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                )
-                AnalysisType.OUTCOME -> TransactionAnalysisCard(
-                    viewModel = AnalysisTransactionViewModel(),
-                    transactionType = AnalysisType.OUTCOME,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                )
-                AnalysisType.BUDGET -> AnalysisBudgetCard(
-                    viewModel = AnalysisBudgetViewModel(),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                )
-                AnalysisType.COMPARISON -> AnalysisComparisonCard(
-                    viewModel = AnalysisComparisonViewModel(),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f)
-                )
+            HorizontalPager(
+                state = pagerState,
+                beyondBoundsPageCount = 3,
+                modifier = Modifier
+                    .fillMaxSize()
+            ) {
+                when (it) {
+                    0 -> TransactionAnalysisCard(
+                        viewModel = AnalysisTransactionViewModel(),
+                        transactionType = AnalysisType.INCOME,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    )
+                    1 -> TransactionAnalysisCard(
+                        viewModel = AnalysisTransactionViewModel(),
+                        transactionType = AnalysisType.OUTCOME,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    )
+                    2 -> AnalysisBudgetCard(
+                        viewModel = AnalysisBudgetViewModel(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    )
+                    3 -> AnalysisComparisonCard(
+                        viewModel = AnalysisComparisonViewModel(),
+                        modifier = Modifier
+                            .fillMaxSize()
+                    )
+                }
             }
         }
     }

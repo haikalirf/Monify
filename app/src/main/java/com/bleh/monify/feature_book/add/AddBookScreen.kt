@@ -1,6 +1,7 @@
 package com.bleh.monify.feature_book.add
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -74,6 +75,7 @@ import com.bleh.monify.feature_book.BookViewModel
 import com.bleh.monify.feature_book.TransferWallet
 import com.bleh.monify.ui.theme.Accent
 import com.bleh.monify.ui.theme.Grey
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.ZoneId
@@ -105,10 +107,19 @@ fun AddBookScreen(
             initialPage = 1,
         ) { 3 }
         LaunchedEffect(pagerState.currentPage) {
+            delay(200)
+            Log.d("pager state", "Pager state: ${pagerState.currentPage}")
             viewModel.resetInputState()
             viewModel.updateTransactionType(pagerState.currentPage)
         }
         val animationSpec: AnimationSpec<Float> = tween(durationMillis = 250, easing = FastOutSlowInEasing)
+        LaunchedEffect(state.transactionType) {
+            Log.d("transaction type", "Transaction type: ${state.transactionType}")
+            pagerState.animateScrollToPage(
+                page = state.transactionType,
+                animationSpec = animationSpec
+            )
+        }
         Column {
             Box(
                 contentAlignment = Alignment.Center,
@@ -134,12 +145,8 @@ fun AddBookScreen(
                                 .scale(0.95f)
                         ) {
                             viewModel.updateTransactionType(type.value)
-                            coroutineScope.launch {
-                                pagerState.animateScrollToPage(
-                                    page = state.transactionType,
-                                    animationSpec = animationSpec
-                                )
-                            }
+//                            Log.d("tab position value","Position: $it")
+//                            Log.d("tab type value","Type value: $type.value")
                         }
                     }
                 }

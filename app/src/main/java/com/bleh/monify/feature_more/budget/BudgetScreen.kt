@@ -1,4 +1,4 @@
-package com.bleh.monify.feature_more.budget.budget
+package com.bleh.monify.feature_more.budget
 
 import android.annotation.SuppressLint
 import androidx.compose.animation.core.AnimationSpec
@@ -44,9 +44,8 @@ import com.bleh.monify.R
 import com.bleh.monify.core.ui_components.AccentedButton
 import com.bleh.monify.core.ui_components.SelectionBar
 import com.bleh.monify.core.ui_components.TabTitle
-import com.bleh.monify.feature_more.budget.BudgetType
-import com.bleh.monify.feature_more.budget.BudgetViewModel
 import com.bleh.monify.ui.theme.Accent
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
@@ -79,6 +78,12 @@ fun BudgetScreen(
             viewModel.updateBudgetType(budgetType)
         }
         val animationSpec: AnimationSpec<Float> = tween(durationMillis = 250, easing = FastOutSlowInEasing)
+        LaunchedEffect(state.budgetType) {
+            pagerState.animateScrollToPage(
+                page = state.budgetType.value,
+                animationSpec = animationSpec
+            )
+        }
         Column {
             Box(
                 contentAlignment = Alignment.Center,
@@ -107,12 +112,6 @@ fun BudgetScreen(
                                 else -> BudgetType.MONTHLY
                             }
                             viewModel.updateBudgetType(budgetType)
-                            coroutineScope.launch {
-                                pagerState.animateScrollToPage(
-                                    page = state.budgetType.value,
-                                    animationSpec = animationSpec
-                                )
-                            }
                         }
                     }
                 }
