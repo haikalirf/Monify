@@ -24,12 +24,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.paint
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
@@ -37,6 +39,8 @@ import androidx.navigation.NavController
 import com.bleh.monify.R
 import com.bleh.monify.core.ui_components.AccentedButton
 import com.bleh.monify.core.ui_components.BottomBar
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -45,6 +49,7 @@ fun MoreScreen(
     viewModel: MoreViewModel,
 ) {
     val state by viewModel.state.collectAsState()
+    val coroutineScope = rememberCoroutineScope()
     Scaffold(
         bottomBar = {
             BottomBar(
@@ -152,7 +157,16 @@ fun MoreScreen(
                     .weight(1f)
             ){
                 AccentedButton(
-                    onClick = { /*TODO*/ },
+                    onClick = {
+                        coroutineScope.launch {
+                            viewModel.onLogoutClick()
+                            navController.navigate("auth") {
+                                popUpTo("login") {
+                                    inclusive = true
+                                }
+                            }
+                        }
+                    },
                     text = "Logout",
                     modifier = Modifier
                         .height(50.dp)

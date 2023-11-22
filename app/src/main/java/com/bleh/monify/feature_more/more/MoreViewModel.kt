@@ -2,6 +2,7 @@ package com.bleh.monify.feature_more.more
 
 import androidx.lifecycle.ViewModel
 import com.bleh.monify.R
+import com.bleh.monify.feature_auth.GoogleAuthUiClient
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -15,7 +16,7 @@ data class MoreState(
 
 @HiltViewModel
 class MoreViewModel @Inject constructor(
-
+    private val authUiClient: GoogleAuthUiClient
 ): ViewModel() {
     private val _state = MutableStateFlow(MoreState())
     val state = _state.asStateFlow()
@@ -30,5 +31,9 @@ class MoreViewModel @Inject constructor(
         _state.update {
             it.copy(profileImage = image)
         }
+    }
+
+    suspend fun onLogoutClick() {
+        authUiClient.logout()
     }
 }

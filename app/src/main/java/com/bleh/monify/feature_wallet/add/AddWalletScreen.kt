@@ -41,6 +41,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.bleh.monify.R
@@ -65,18 +66,16 @@ fun AddWalletScreen(
         Column(
             modifier = Modifier
         ) {
-            Column {
-                AddWalletComposable(
-                    modifier = Modifier
-                        .padding(top = 60.dp)
-                )
-                AddWalletCard(
-                    viewModel = viewModel,
-                    navController = navController,
-                    modifier = Modifier
-                        .padding(top = 10.dp)
-                )
-            }
+            AddWalletComposable(
+                modifier = Modifier
+                    .padding(top = 60.dp)
+            )
+            AddWalletCard(
+                viewModel = viewModel,
+                navController = navController,
+                modifier = Modifier
+                    .padding(top = 10.dp)
+            )
         }
     }
 }

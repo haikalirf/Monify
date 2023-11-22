@@ -1,8 +1,10 @@
 package com.bleh.monify.feature_auth.login
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,6 +18,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -24,7 +28,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.paint
@@ -37,6 +44,8 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -66,14 +75,13 @@ fun LoginScreen(
         append(stringResource(R.string.login_sign_up))
         pop()
     }
-    LaunchedEffect(key1 = Unit) {
-        viewModel.checkLogin()
-//        if (state.isUserLoggedIn) {
-            navController.navigate("book_main") {
+    LaunchedEffect(Unit) {
+        if (state.isUserLoggedIn) {
+            navController.navigate("book") {
                 popUpTo("auth") {
                     inclusive = true
                 }
-//            }
+            }
         }
     }
     Scaffold(
@@ -165,13 +173,31 @@ fun LoginCard(
             OutlinedTextField(
                 value = emailState,
                 onValueChange = onEmailChange,
+                maxLines = 1,
                 modifier = Modifier
                     .padding(horizontal = 30.dp)
                     .padding(top = 40.dp)
             )
+            var passwordVisible by rememberSaveable { mutableStateOf(false) }
             OutlinedTextField(
                 value = passwordState,
                 onValueChange = onPasswordChange,
+                maxLines = 1,
+                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                trailingIcon = {
+                    IconButton(
+                        onClick = {
+                            passwordVisible = !passwordVisible
+                        }
+                    ) {
+                        Icon(
+                            painter = painterResource(
+                                id = if (passwordVisible) R.drawable.ic_eye else R.drawable.ic_eye_crossed
+                            ),
+                            contentDescription = "Password Visibility Toggle"
+                        )
+                    }
+                },
                 modifier = Modifier
                     .padding(horizontal = 30.dp)
                     .padding(top = 24.dp)

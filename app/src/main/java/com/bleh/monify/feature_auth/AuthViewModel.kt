@@ -22,6 +22,10 @@ class AuthViewModel @Inject constructor(
     private val _state = MutableStateFlow(AuthState())
     val state = _state.asStateFlow()
 
+    init {
+        checkLogin()
+    }
+
     fun updateEmailState (email: String) {
         _state.update {
             it.copy(emailState = email)
@@ -68,7 +72,7 @@ class AuthViewModel @Inject constructor(
         }
     }
 
-    fun checkLogin () {
+    private fun checkLogin () {
         val userData = authUiClient.getLoggedInUser()
         _state.update {
             it.copy(

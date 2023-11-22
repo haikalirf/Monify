@@ -16,6 +16,7 @@ import androidx.navigation.compose.rememberNavController
 import com.bleh.monify.feature_analysis.analysis.AnalysisViewModel
 import com.bleh.monify.feature_analysis.analysis.AnalysisScreen
 import com.bleh.monify.feature_auth.AuthViewModel
+import com.bleh.monify.feature_auth.GoogleAuthUiClient
 import com.bleh.monify.feature_auth.login.LoginScreen
 import com.bleh.monify.feature_auth.register.RegisterScreen
 import com.bleh.monify.feature_book.BookViewModel
@@ -33,13 +34,19 @@ import com.bleh.monify.feature_wallet.add.AddWalletScreen
 import com.bleh.monify.feature_wallet.wallet.WalletScreen
 import com.bleh.monify.ui.theme.MonifyTheme
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    @Inject
+    lateinit var authUiClient: GoogleAuthUiClient
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             val navController = rememberNavController()
+//            val isUserLoggedIn = authUiClient.getLoggedInUser() != null
+//            val startDestination = if (isUserLoggedIn) "book" else "auth"
             MonifyTheme {
                 NavHost(navController = navController, startDestination = "auth") {
                     navigation(startDestination = "login", route = "auth") {

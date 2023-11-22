@@ -64,20 +64,18 @@ fun WalletScreen(
         Column(
             modifier = Modifier
         ) {
-            Column {
-                WalletTotalComposable(
-                    viewModel = viewModel,
-                    modifier = Modifier
-                        .padding(top = 60.dp)
-                )
-                WalletList(
-                    viewModel = viewModel,
-                    columnContentPadding = it,
-                    modifier = Modifier
-                        .padding(top = 20.dp)
-                        .weight(1f)
-                )
-            }
+            WalletTotalComposable(
+                viewModel = viewModel,
+                modifier = Modifier
+                    .padding(top = 60.dp)
+            )
+            WalletList(
+                viewModel = viewModel,
+                columnContentPadding = it,
+                modifier = Modifier
+                    .padding(top = 20.dp)
+                    .weight(1f)
+            )
         }
     }
 }
