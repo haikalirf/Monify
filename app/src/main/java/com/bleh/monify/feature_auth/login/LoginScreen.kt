@@ -119,7 +119,11 @@ fun LoginScreen(
                             Toast.LENGTH_SHORT
                         ).show()
                         if (loginResult.data != null) {
-                            navController.navigate("book_main")
+                            navController.navigate("book_main") {
+                                popUpTo("auth") {
+                                    inclusive = true
+                                }
+                            }
                         }
                     }
                 },
