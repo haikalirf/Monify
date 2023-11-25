@@ -1,11 +1,10 @@
-package com.bleh.monify.core.db_models
+package com.bleh.monify.core.models
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
-import java.math.BigDecimal
 import java.time.LocalDate
-import java.util.Date
 
 @Entity(
     foreignKeys = [
@@ -37,6 +36,12 @@ import java.util.Date
             onDelete = ForeignKey.CASCADE,
             onUpdate = ForeignKey.CASCADE
         )
+    ],
+    indices = [
+        Index(value = ["idUser"]),
+        Index(value = ["idWalletFrom"]),
+        Index(value = ["idWalletTo"]),
+        Index(value = ["idCategory"])
     ]
 )
 data class Transaction(

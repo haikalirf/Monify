@@ -54,7 +54,6 @@ import com.bleh.monify.core.ui_components.AccentedButton
 import com.bleh.monify.feature_auth.AuthViewModel
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
     navController: NavController,

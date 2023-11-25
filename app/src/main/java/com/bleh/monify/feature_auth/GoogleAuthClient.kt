@@ -1,23 +1,20 @@
 package com.bleh.monify.feature_auth
 
-import android.app.Activity
 import android.content.ContentValues.TAG
 import android.content.Context
 import android.content.Intent
 import android.content.IntentSender
 import android.util.Log
-import android.widget.Toast
 import com.bleh.monify.R
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.SignInClient
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.tasks.await
 
-class GoogleAuthUiClient(
+class GoogleAuthClient(
     private val context: Context,
     private val oneTapClient: SignInClient
 ) {
@@ -54,7 +51,6 @@ class GoogleAuthUiClient(
         val trimmedPassword = password.trim()
         return try {
             val authResult = auth.signInWithEmailAndPassword(trimmedEmail, trimmedPassword).await()
-            // Sign-in was successful
             val user = authResult.user
             Log.d(TAG, "signInWithEmail:success")
             LoginResult(

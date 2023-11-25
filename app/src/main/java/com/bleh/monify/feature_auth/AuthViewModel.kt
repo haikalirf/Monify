@@ -17,7 +17,7 @@ data class AuthState(
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
-    private val authUiClient: GoogleAuthUiClient
+    private val authUiClient: GoogleAuthClient
 ): ViewModel() {
     private val _state = MutableStateFlow(AuthState())
     val state = _state.asStateFlow()

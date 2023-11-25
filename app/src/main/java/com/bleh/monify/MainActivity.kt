@@ -16,7 +16,7 @@ import androidx.navigation.compose.rememberNavController
 import com.bleh.monify.feature_analysis.analysis.AnalysisViewModel
 import com.bleh.monify.feature_analysis.analysis.AnalysisScreen
 import com.bleh.monify.feature_auth.AuthViewModel
-import com.bleh.monify.feature_auth.GoogleAuthUiClient
+import com.bleh.monify.feature_auth.GoogleAuthClient
 import com.bleh.monify.feature_auth.login.LoginScreen
 import com.bleh.monify.feature_auth.register.RegisterScreen
 import com.bleh.monify.feature_book.BookViewModel
@@ -39,7 +39,7 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     @Inject
-    lateinit var authUiClient: GoogleAuthUiClient
+    lateinit var authUiClient: GoogleAuthClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

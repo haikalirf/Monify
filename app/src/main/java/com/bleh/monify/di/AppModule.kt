@@ -1,9 +1,11 @@
 package com.bleh.monify.di
 
 import android.content.Context
-import com.bleh.monify.feature_auth.GoogleAuthUiClient
+import androidx.room.Room
+import com.bleh.monify.core.daos.UserDao
+import com.bleh.monify.core.database.AppDatabase
+import com.bleh.monify.feature_auth.GoogleAuthClient
 import com.google.android.gms.auth.api.identity.Identity
-import com.google.android.gms.auth.api.identity.SignInClient
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -19,10 +21,26 @@ object AppModule {
     fun provideAuthUiClient(
         @ApplicationContext
         context: Context,
-    ): GoogleAuthUiClient {
-        return GoogleAuthUiClient(
+    ): GoogleAuthClient {
+        return GoogleAuthClient(
             context = context,
             oneTapClient = Identity.getSignInClient(context)
         )
+    }
+    
+    @Provides
+    @Singleton
+    fun provideAppDatabase(@ApplicationContext appContext: Context): AppDatabase {
+        return Room.databaseBuilder(
+            appContext,
+            AppDatabase::class.java,
+            "room_database"
+        ).build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideUserDao(appDatabase: AppDatabase) : UserDao {
+        return appDatabase.userDao()
     }
 }

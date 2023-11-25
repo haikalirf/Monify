@@ -104,6 +104,7 @@ fun AnalysisComparisonCard(
                 Icon(painter = painterResource(id = R.drawable.ic_chevron_right), contentDescription = "right arrow")
             }
         }
+        //TODO pie chart
         ComparisonBarChart(
             viewModel = viewModel,
             modifier = Modifier
@@ -111,7 +112,7 @@ fun AnalysisComparisonCard(
                 .padding(bottom = 60.dp)
         )
         ComparisonProgressBar(
-            progress = state.outcome.toFloat() / state.income.toFloat(),
+            progress = state.outcome.toFloat() / (state.income.toFloat() + state.outcome.toFloat()),
             modifier = Modifier
                 .fillMaxWidth()
                 .height(16.dp)
