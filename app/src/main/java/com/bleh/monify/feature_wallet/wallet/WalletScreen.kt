@@ -22,6 +22,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -33,9 +35,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.bleh.monify.R
+import com.bleh.monify.core.helper.indonesianFormatter
 import com.bleh.monify.core.ui_components.BottomBar
 import com.bleh.monify.core.ui_components.FloatingAddButton
 import com.bleh.monify.feature_wallet.WalletViewModel
+import com.bleh.monify.feature_wallet.helper.walletIconList
 
 @Composable
 fun WalletScreen(
@@ -70,6 +74,7 @@ fun WalletScreen(
                     .padding(top = 60.dp)
             )
             WalletList(
+                navController = navController,
                 viewModel = viewModel,
                 columnContentPadding = it,
                 modifier = Modifier
@@ -85,6 +90,8 @@ fun WalletTotalComposable(
     viewModel: WalletViewModel,
     modifier: Modifier = Modifier
 ) {
+    val state by viewModel.state.collectAsState()
+    val formatter = indonesianFormatter()
     Card(
         colors = CardDefaults.cardColors(
             containerColor = Color.White
@@ -107,7 +114,7 @@ fun WalletTotalComposable(
                 style = MaterialTheme.typography.titleMedium,
             )
             Text(
-                text = "Rp 3,000,000.00",
+                text = formatter.format(state.totalNominal),
                 style = MaterialTheme.typography.titleMedium,
             )
         }
@@ -116,10 +123,14 @@ fun WalletTotalComposable(
 
 @Composable
 fun WalletList(
+    navController: NavController,
     viewModel: WalletViewModel,
     modifier: Modifier = Modifier,
     columnContentPadding: PaddingValues = PaddingValues(0.dp)
 ) {
+    val state by viewModel.state.collectAsState()
+    val formatter = indonesianFormatter()
+    val iconList = walletIconList()
     LazyColumn(
         contentPadding = PaddingValues(top = 20.dp, bottom = columnContentPadding.calculateBottomPadding()+85.dp),
         modifier = modifier
@@ -128,9 +139,23 @@ fun WalletList(
             .background(Color.White)
     ) {
         item {
-            WalletListItem(icon = R.drawable.bca, name = "BCA", nominal = "RP 1,000,000.00") {}
-            WalletListItem(icon = R.drawable.dana, name = "Dana", nominal = "RP 1,000,000.00") {}
-            WalletListItem(icon = R.drawable.gopay, name = "Gopay", nominal = "RP 1,000,000.00") {}
+            state.wallets.forEachIndexed { index, wallet ->
+                if(!wallet.isDeleted) {
+                    WalletListItem(
+                        icon = wallet.icon,
+                        name = wallet.name,
+                        nominal = formatter.format(wallet.balance),
+                        onClick = {
+                            viewModel.updateIsEditState(true)
+                            viewModel.updateWalletNameState(wallet.name)
+                            viewModel.updateWalletNominalState(wallet.balance.toString())
+                            viewModel.updateSelectedWalletState(iconList.indexOf(wallet.icon))
+                            viewModel.updateCurrentEditIdState(wallet.id)
+                            navController.navigate("wallet_add")
+                        }
+                    )
+                }
+            }
         }
     }
 }
@@ -147,11 +172,14 @@ fun WalletListItem(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 20.dp)
-            .clickable { onClick() }
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Start,
+            modifier = Modifier
+                .clickable {
+                    onClick()
+                }
         ) {
             Image(
                 painter = painterResource(id = icon),

@@ -2,16 +2,12 @@ package com.bleh.monify.feature_more.category
 
 import androidx.lifecycle.ViewModel
 import com.bleh.monify.R
+import com.bleh.monify.core.enums.CategoryType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import javax.inject.Inject
-
-enum class CategoryType(val value: Int, val categoryName: String, val icon: Int) {
-    INCOME(0, "Pemasukan", R.drawable.ic_income),
-    OUTCOME(1, "Pengeluaran", R.drawable.ic_outcome)
-}
 
 data class CategoryState(
     val categoryType: CategoryType = CategoryType.OUTCOME,

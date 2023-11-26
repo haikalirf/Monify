@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.PopupProperties
 import com.bleh.monify.R
+import com.bleh.monify.core.enums.BudgetType
 import com.bleh.monify.core.helper.indonesianFormatter
 import com.bleh.monify.ui.theme.Accent
 import com.bleh.monify.ui.theme.Grey
@@ -91,7 +92,7 @@ fun TimeframeDropDown(
             .fillMaxWidth()
     ) {
         OutlinedTextField(
-            value = state.budgetTimeFrame.value,
+            value = state.budgetTimeFrame.budgetType,
             onValueChange = {},
             shape = RoundedCornerShape(30.dp),
             colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(
@@ -142,15 +143,15 @@ fun TimeframeDropDown(
                         shape = RoundedCornerShape(24.dp)
                     )
             ) {
-                if (state.budgetTimeFrame == BudgetTimeFrame.MONTH) {
+                if (state.budgetTimeFrame == BudgetType.MONTHLY) {
                     TimeframeDropDownItem(
                         viewModel = viewModel,
-                        budgetTimeFrame = BudgetTimeFrame.WEEK,
+                        budgetTimeFrame = BudgetType.WEEKLY,
                     )
                 } else {
                     TimeframeDropDownItem(
                         viewModel = viewModel,
-                        budgetTimeFrame = BudgetTimeFrame.MONTH,
+                        budgetTimeFrame = BudgetType.MONTHLY,
                     )
                 }
             }
@@ -161,12 +162,12 @@ fun TimeframeDropDown(
 @Composable
 fun TimeframeDropDownItem(
     viewModel: AnalysisBudgetViewModel,
-    budgetTimeFrame: BudgetTimeFrame,
+    budgetTimeFrame: BudgetType,
 ) {
     DropdownMenuItem(
         text = {
             Text(
-                text = budgetTimeFrame.value,
+                text = budgetTimeFrame.budgetType,
                 style = MaterialTheme.typography.labelMedium,
             )
         },
@@ -189,10 +190,10 @@ fun BudgetList(
         modifier = modifier
             .fillMaxWidth()
     ) {
-        state.budgetList.forEach {
+        state.uiBudgetLists.forEach {
             item {
                 BudgetListItem(
-                    budget = it,
+                    uiBudget = it,
                     modifier = Modifier
                         .padding(bottom = 10.dp)
                 )
@@ -203,7 +204,7 @@ fun BudgetList(
 
 @Composable
 fun BudgetListItem(
-    budget: Budget,
+    uiBudget: UiBudget,
     modifier: Modifier = Modifier
 ) {
     //TODO THIS FOR THE WHOLE APP
@@ -229,7 +230,7 @@ fun BudgetListItem(
                 .padding(top = 10.dp, bottom = 5.dp)
         ) {
             Icon(
-                painter = painterResource(id = budget.icon),
+                painter = painterResource(id = uiBudget.icon),
                 contentDescription = "Budget icon"
             )
             Spacer(
@@ -241,17 +242,17 @@ fun BudgetListItem(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(
-                    text = budget.name,
+                    text = uiBudget.name,
                     style = MaterialTheme.typography.labelSmall,
                 )
                 Text(
-                    text = formatter.format(budget.amount),
+                    text = formatter.format(uiBudget.amount),
                     style = MaterialTheme.typography.bodyMedium,
                 )
             }
         }
         BudgetProgressBar(
-            progress = (budget.used / budget.amount).toFloat(),
+            progress = (uiBudget.used / uiBudget.amount).toFloat(),
             modifier = Modifier
                 .fillMaxWidth()
                 .height(16.dp)
@@ -280,10 +281,10 @@ fun BudgetListItem(
                 .fillMaxWidth()
         ) {
             Text(
-                text = formatter.format(budget.used),
+                text = formatter.format(uiBudget.used),
                 style = MaterialTheme.typography.bodySmall,
             )
-            val leftOver = budget.amount - budget.used
+            val leftOver = uiBudget.amount - uiBudget.used
             val isOverBudget = leftOver < 0
             Text(
                 text = formatter.format(leftOver),

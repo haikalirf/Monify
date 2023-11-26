@@ -1,31 +1,30 @@
-package com.bleh.monify.core.models
+package com.bleh.monify.core.entities
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import com.bleh.monify.feature_more.category.CategoryType
 
 @Entity(
     foreignKeys = [
         ForeignKey(
             entity = User::class,
             parentColumns = ["id"],
-            childColumns = ["idUser"],
+            childColumns = ["userId"],
             onDelete = ForeignKey.CASCADE,
             onUpdate = ForeignKey.CASCADE
         )
     ],
     indices = [
-        Index(value = ["idUser"])
+        Index(value = ["userId"])
     ]
 )
-data class Category (
-    @PrimaryKey(autoGenerate = false)
-    val id: Int,
-    val idUser: Int,
-    val type: CategoryType,
+data class Wallet(
+    @PrimaryKey(autoGenerate = true)
+    val id: Int = 0,
+    val userId: Int,
     val name: String,
+    val balance: Double,
     val icon: Int,
-    val isDeleted: Boolean,
+    val isDeleted: Boolean = false,
 )

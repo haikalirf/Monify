@@ -1,4 +1,4 @@
-package com.bleh.monify.core.models
+package com.bleh.monify.core.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

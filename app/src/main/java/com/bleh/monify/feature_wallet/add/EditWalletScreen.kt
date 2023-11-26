@@ -1,6 +1,7 @@
 package com.bleh.monify.feature_wallet.add
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -9,8 +10,8 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,9 +20,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -37,21 +38,22 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.paint
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.PlatformTextStyle
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.bleh.monify.R
+import com.bleh.monify.core.helper.indonesianFormatter
 import com.bleh.monify.core.ui_components.AccentedButton
 import com.bleh.monify.feature_wallet.WalletViewModel
+import com.bleh.monify.feature_wallet.helper.walletIconList
 import com.bleh.monify.ui.theme.Grey
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun AddWalletScreen(
+fun EditWalletScreen(
     navController: NavController,
     viewModel: WalletViewModel,
 ) {
@@ -67,6 +69,7 @@ fun AddWalletScreen(
             modifier = Modifier
         ) {
             AddWalletComposable(
+                viewModel = viewModel,
                 modifier = Modifier
                     .padding(top = 60.dp)
             )
@@ -82,8 +85,10 @@ fun AddWalletScreen(
 
 @Composable
 fun AddWalletComposable(
+    viewModel: WalletViewModel,
     modifier: Modifier = Modifier
 ) {
+    val state by viewModel.state.collectAsState()
     Card(
         colors = CardDefaults.cardColors(
             containerColor = Color.White
@@ -100,7 +105,7 @@ fun AddWalletComposable(
                 .fillMaxSize()
         ) {
             Text(
-                text = "Tambah Dompet",
+                text = if(state.isEdit) "Ubah / Hapus Dompet" else "Tambah Dompet",
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.titleMedium,
             )
@@ -115,6 +120,7 @@ fun AddWalletCard(
     modifier: Modifier = Modifier
 ) {
     val state by viewModel.state.collectAsState()
+    val formatter = indonesianFormatter()
     Column(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start,
@@ -143,6 +149,7 @@ fun AddWalletCard(
                     includeFontPadding = false
                 )
             ),
+            maxLines = 1,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(55.dp)
@@ -166,6 +173,19 @@ fun AddWalletCard(
                     includeFontPadding = false
                 )
             ),
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Decimal
+            ),
+            prefix = {
+                Text(
+                    text = "Rp ",
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier
+                        .height(55.dp)
+                        .padding(bottom = 5.dp)
+                )
+            },
+            maxLines = 1,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(55.dp)
@@ -181,32 +201,13 @@ fun AddWalletCard(
                 .fillMaxWidth()
                 .weight(1f)
         )
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceAround,
+        ButtonCombinations(
+            viewModel = viewModel,
+            navController = navController,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 20.dp)
-        ) {
-            AccentedButton(
-                onClick = {
-                    navController.navigate("wallet_main") {
-                        popUpTo("wallet_main") {
-                            inclusive = true
-                        }
-                    }
-                },
-                text = "Kembali",
-                modifier = Modifier
-                    .size(160.dp, 50.dp)
-            )
-            AccentedButton(
-                onClick = { /*TODO*/ },
-                text = "Tambah",
-                modifier = Modifier
-                    .size(160.dp, 50.dp)
-            )
-        }
+        )
     }
 }
 
@@ -218,6 +219,7 @@ fun WalletGrid(
     val state by viewModel.state.collectAsState()
     LazyVerticalGrid(
         columns = GridCells.Fixed(4),
+        contentPadding = PaddingValues(top = 20.dp, bottom = 20.dp),
         modifier = modifier
             .border(
                 width = 1.dp,
@@ -226,19 +228,16 @@ fun WalletGrid(
             )
             .padding(horizontal = 20.dp)
     ) {
-        items(4) {
-            Spacer(modifier = Modifier.size(20.dp))
-        }
-        items(20) {
-            WalletItem(
-                icon = R.drawable.bca,
-                isSelected = it == state.selectedWallet
-            ) {
-                viewModel.updateSelectedWalletState(it)
+        walletIconList().forEachIndexed { index, it ->
+            item {
+                WalletItem(
+                    icon = it,
+                    isSelected = index == state.selectedWallet
+                ) {
+                    viewModel.updateSelectedWalletState(index)
+                    Log.d("WalletIcon", "WalletIcon: $index")
+                }
             }
-        }
-        items(4) {
-            Spacer(modifier = Modifier.size(20.dp))
         }
     }
 }
@@ -275,11 +274,88 @@ fun WalletItem(
     }
 }
 
-//@Preview
 @Composable
-fun AddWalletScreenPreview() {
-    AddWalletScreen(
-        navController = NavController(LocalContext.current),
-        viewModel = WalletViewModel()
-    )
+fun ButtonCombinations(
+    viewModel: WalletViewModel,
+    navController: NavController,
+    modifier: Modifier = Modifier
+) {
+    val state by viewModel.state.collectAsState()
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceAround,
+        modifier = modifier
+    ) {
+        if(state.isEdit) {
+            AccentedButton(
+                onClick = {
+                    viewModel.resetState()
+                    navController.navigate("wallet_main") {
+                        popUpTo("wallet_main") {
+                            inclusive = true
+                        }
+                    }
+                },
+                text = "Kembali",
+                modifier = Modifier
+                    .size(120.dp, 50.dp)
+            )
+            AccentedButton(
+                onClick = {
+                    viewModel.upsertWallet()
+                    viewModel.resetState()
+                    navController.navigate("wallet_main") {
+                        popUpTo("wallet_main") {
+                            inclusive = true
+                        }
+                    }
+                },
+                text = "Simpan",
+                modifier = Modifier
+                    .size(120.dp, 50.dp)
+            )
+            AccentedButton(
+                onClick = {
+                    viewModel.setDeletedTrue(state.currentEditId)
+                    viewModel.resetState()
+                    navController.navigate("wallet_main") {
+                        popUpTo("wallet_main") {
+                            inclusive = true
+                        }
+                    }
+                },
+                text = "Hapus",
+                modifier = Modifier
+                    .size(120.dp, 50.dp)
+            )
+        } else {
+            AccentedButton(
+                onClick = {
+                    viewModel.resetState()
+                    navController.navigate("wallet_main") {
+                        popUpTo("wallet_main") {
+                            inclusive = true
+                        }
+                    }
+                },
+                text = "Kembali",
+                modifier = Modifier
+                    .size(160.dp, 50.dp)
+            )
+            AccentedButton(
+                onClick = {
+                    viewModel.upsertWallet()
+                    viewModel.resetState()
+                    navController.navigate("wallet_main") {
+                        popUpTo("wallet_main") {
+                            inclusive = true
+                        }
+                    }
+                },
+                text = "Tambah",
+                modifier = Modifier
+                    .size(160.dp, 50.dp)
+            )
+        }
+    }
 }

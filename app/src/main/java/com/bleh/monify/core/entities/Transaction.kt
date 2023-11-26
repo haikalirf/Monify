@@ -1,4 +1,4 @@
-package com.bleh.monify.core.models
+package com.bleh.monify.core.entities
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
@@ -11,46 +11,46 @@ import java.time.LocalDate
         ForeignKey(
             entity = User::class,
             parentColumns = ["id"],
-            childColumns = ["idUser"],
+            childColumns = ["userId"],
             onDelete = ForeignKey.CASCADE,
             onUpdate = ForeignKey.CASCADE
         ),
         ForeignKey(
             entity = Wallet::class,
             parentColumns = ["id"],
-            childColumns = ["idWalletFrom"],
+            childColumns = ["walletFromId"],
             onDelete = ForeignKey.CASCADE,
             onUpdate = ForeignKey.CASCADE
         ),
         ForeignKey(
             entity = Wallet::class,
             parentColumns = ["id"],
-            childColumns = ["idWalletTo"],
+            childColumns = ["walletToId"],
             onDelete = ForeignKey.CASCADE,
             onUpdate = ForeignKey.CASCADE
         ),
         ForeignKey(
             entity = Category::class,
             parentColumns = ["id"],
-            childColumns = ["idCategory"],
+            childColumns = ["categoryId"],
             onDelete = ForeignKey.CASCADE,
             onUpdate = ForeignKey.CASCADE
         )
     ],
     indices = [
-        Index(value = ["idUser"]),
-        Index(value = ["idWalletFrom"]),
-        Index(value = ["idWalletTo"]),
-        Index(value = ["idCategory"])
+        Index(value = ["userId"]),
+        Index(value = ["walletFromId"]),
+        Index(value = ["walletToId"]),
+        Index(value = ["categoryId"])
     ]
 )
 data class Transaction(
-    @PrimaryKey(autoGenerate = false)
-    val id: Int,
-    val idUser: Int,
-    val idWalletFrom: Int,
-    val idWalletTo: Int,
-    val idCategory: Int,
+    @PrimaryKey(autoGenerate = true)
+    val id: Int = 0,
+    val userId: Int,
+    val walletFromId: Int,
+    val walletToId: Int,
+    val categoryId: Int,
     val isTransfer: Boolean,
     val description: String,
     val balance: Double,

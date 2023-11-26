@@ -161,9 +161,7 @@ fun MoreScreen(
                         coroutineScope.launch {
                             viewModel.onLogoutClick()
                             navController.navigate("auth") {
-                                popUpTo("auth") {
-                                    inclusive = true
-                                }
+                                popUpTo(navController.graph.id)
                             }
                         }
                     },

@@ -7,12 +7,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
+import com.bleh.monify.core.daos.BaseDao
+import com.bleh.monify.core.daos.BudgetDao
+import com.bleh.monify.core.daos.CategoryDao
+import com.bleh.monify.core.daos.TransactionDao
+import com.bleh.monify.core.daos.UserDao
+import com.bleh.monify.core.daos.WalletDao
+import com.bleh.monify.core.database.AppDatabase
+import com.bleh.monify.core.helper.MockData
 import com.bleh.monify.feature_analysis.analysis.AnalysisViewModel
 import com.bleh.monify.feature_analysis.analysis.AnalysisScreen
 import com.bleh.monify.feature_auth.AuthViewModel
@@ -30,23 +39,50 @@ import com.bleh.monify.feature_more.category.CategoryViewModel
 import com.bleh.monify.feature_more.more.MoreViewModel
 import com.bleh.monify.feature_more.more.MoreScreen
 import com.bleh.monify.feature_wallet.WalletViewModel
-import com.bleh.monify.feature_wallet.add.AddWalletScreen
+import com.bleh.monify.feature_wallet.add.EditWalletScreen
 import com.bleh.monify.feature_wallet.wallet.WalletScreen
 import com.bleh.monify.ui.theme.MonifyTheme
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     @Inject
     lateinit var authUiClient: GoogleAuthClient
+    @Inject
+    lateinit var appDatabase: AppDatabase
+    @Inject
+    lateinit var baseDao: BaseDao
+    @Inject
+    lateinit var userDao: UserDao
+    @Inject
+    lateinit var budgetDao: BudgetDao
+    @Inject
+    lateinit var walletDao: WalletDao
+    @Inject
+    lateinit var transactionDao: TransactionDao
+    @Inject
+    lateinit var categoryDao: CategoryDao
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        lifecycleScope.launch {
+            appDatabase.clearAllTables()
+            baseDao.deleteAllPrimaryKeys()
+            val mockData = MockData(
+                userDao = userDao,
+                budgetDao = budgetDao,
+                walletDao = walletDao,
+                transactionDao = transactionDao,
+                categoryDao = categoryDao
+            )
+            mockData.insertMockData()
+        }
+
         setContent {
             val navController = rememberNavController()
-//            val isUserLoggedIn = authUiClient.getLoggedInUser() != null
-//            val startDestination = if (isUserLoggedIn) "book" else "auth"
             MonifyTheme {
                 NavHost(navController = navController, startDestination = "auth") {
                     navigation(startDestination = "login", route = "auth") {
@@ -76,7 +112,7 @@ class MainActivity : ComponentActivity() {
                         }
                         composable("wallet_add") {
                             val viewModel = it.sharedViewModel<WalletViewModel>(navController = navController)
-                            AddWalletScreen(navController = navController, viewModel = viewModel)
+                            EditWalletScreen(navController = navController, viewModel = viewModel)
                         }
                     }
                     navigation(startDestination = "analysis_main", route = "analysis") {

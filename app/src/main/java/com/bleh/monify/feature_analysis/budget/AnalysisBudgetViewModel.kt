@@ -2,49 +2,46 @@ package com.bleh.monify.feature_analysis.budget
 
 import androidx.lifecycle.ViewModel
 import com.bleh.monify.R
+import com.bleh.monify.core.enums.BudgetType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
-enum class BudgetTimeFrame(val value: String) {
-    WEEK("Mingguan"),
-    MONTH("Bulanan")
-}
 
-data class Budget(
+data class UiBudget(
     val icon: Int,
     val name: String,
     val amount: Double,
     val used: Double,
-    val timeFrame: BudgetTimeFrame
+    val budgetType: BudgetType
 )
 
 data class AnalysisBudgetState(
-    val budgetTimeFrame: BudgetTimeFrame = BudgetTimeFrame.MONTH,
+    val budgetTimeFrame: BudgetType = BudgetType.MONTHLY,
     val isDropDownExpanded: Boolean = false,
-    val budgetList: List<Budget> = listOf(
-        Budget(
+    val uiBudgetLists: List<UiBudget> = listOf(
+        UiBudget(
             icon = R.drawable.ic_food,
             name = "Manakan & Minuman",
             amount = 800000.0,
             used = 800000.0,
-            timeFrame = BudgetTimeFrame.MONTH
+            budgetType = BudgetType.MONTHLY
         ),
-        Budget(
+        UiBudget(
             icon = R.drawable.ic_health,
             name = "Kesehatan",
             amount = 200000.0,
             used = 400000.0,
-            timeFrame = BudgetTimeFrame.MONTH
+            budgetType = BudgetType.MONTHLY
         ),
-        Budget(
+        UiBudget(
             icon = R.drawable.ic_education,
             name = "Pendidikan",
             amount = 10000000.0,
             used = 1000000.0,
-            timeFrame = BudgetTimeFrame.MONTH
+            budgetType = BudgetType.MONTHLY
         ),
     )
 )
@@ -56,7 +53,7 @@ class AnalysisBudgetViewModel @Inject constructor(
     private val _state = MutableStateFlow(AnalysisBudgetState())
     val state = _state.asStateFlow()
 
-    fun updateBudgetTimeFrame (timeFrame: BudgetTimeFrame) {
+    fun updateBudgetTimeFrame (timeFrame: BudgetType) {
         _state.update {
             it.copy(budgetTimeFrame = timeFrame)
         }
@@ -68,9 +65,9 @@ class AnalysisBudgetViewModel @Inject constructor(
         }
     }
 
-    fun updateBudgetList (list: List<Budget>) {
+    fun updateBudgetList (list: List<UiBudget>) {
         _state.update {
-            it.copy(budgetList = list)
+            it.copy(uiBudgetLists = list)
         }
     }
 }

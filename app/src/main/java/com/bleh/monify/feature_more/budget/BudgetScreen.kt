@@ -41,6 +41,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.bleh.monify.R
+import com.bleh.monify.core.enums.BudgetType
 import com.bleh.monify.core.ui_components.AccentedButton
 import com.bleh.monify.core.ui_components.SelectionBar
 import com.bleh.monify.core.ui_components.TabTitle

@@ -1,29 +1,30 @@
-package com.bleh.monify.core.models
+package com.bleh.monify.core.entities
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import com.bleh.monify.feature_more.budget.BudgetType
+import com.bleh.monify.core.enums.BudgetType
 
 @Entity(
     foreignKeys = [
         ForeignKey(
             entity = Category::class,
             parentColumns = ["id"],
-            childColumns = ["idCategory"],
+            childColumns = ["categoryId"],
             onDelete = ForeignKey.CASCADE,
             onUpdate = ForeignKey.CASCADE
         )
     ],
     indices = [
-        Index(value = ["idCategory"])
+        Index(value = ["categoryId"])
     ]
 )
 data class Budget (
-    @PrimaryKey(autoGenerate = false)
-    val id: Int,
-    val idCategory: Int,
+    @PrimaryKey(autoGenerate = true)
+    val id: Int = 0,
+    val categoryId: Int,
     val type: BudgetType,
-    val balance: Double
+    val amount: Double? = null,
+    val used: Double,
 )

@@ -4,7 +4,7 @@ import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Query
 import androidx.room.Upsert
-import com.bleh.monify.core.models.User
+import com.bleh.monify.core.entities.User
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -18,4 +18,7 @@ interface UserDao {
 
     @Query("SELECT * FROM user")
     fun getUsers(): Flow<List<User>>
+
+    @Query("SELECT * FROM user WHERE id = :id")
+    fun getUser(id: Int): Flow<List<User>>
 }
