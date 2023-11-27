@@ -1,7 +1,9 @@
-package com.bleh.monify.feature_wallet.add
+package com.bleh.monify.feature_wallet.edit
 
 import android.annotation.SuppressLint
 import android.util.Log
+import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -38,6 +40,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.paint
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.input.KeyboardType
@@ -57,6 +60,10 @@ fun EditWalletScreen(
     navController: NavController,
     viewModel: WalletViewModel,
 ) {
+    BackHandler {
+        viewModel.resetState()
+        navController.popBackStack()
+    }
     Scaffold(
         containerColor = Color.Transparent,
         modifier = Modifier
@@ -281,6 +288,7 @@ fun ButtonCombinations(
     modifier: Modifier = Modifier
 ) {
     val state by viewModel.state.collectAsState()
+    val context = LocalContext.current
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceAround,
@@ -290,11 +298,7 @@ fun ButtonCombinations(
             AccentedButton(
                 onClick = {
                     viewModel.resetState()
-                    navController.navigate("wallet_main") {
-                        popUpTo("wallet_main") {
-                            inclusive = true
-                        }
-                    }
+                    navController.popBackStack()
                 },
                 text = "Kembali",
                 modifier = Modifier
@@ -302,12 +306,9 @@ fun ButtonCombinations(
             )
             AccentedButton(
                 onClick = {
-                    viewModel.upsertWallet()
-                    viewModel.resetState()
-                    navController.navigate("wallet_main") {
-                        popUpTo("wallet_main") {
-                            inclusive = true
-                        }
+                    if(viewModel.upsertWallet(context)== null) {
+                        viewModel.resetState()
+                        navController.popBackStack()
                     }
                 },
                 text = "Simpan",
@@ -318,11 +319,7 @@ fun ButtonCombinations(
                 onClick = {
                     viewModel.setDeletedTrue(state.currentEditId)
                     viewModel.resetState()
-                    navController.navigate("wallet_main") {
-                        popUpTo("wallet_main") {
-                            inclusive = true
-                        }
-                    }
+                    navController.popBackStack()
                 },
                 text = "Hapus",
                 modifier = Modifier
@@ -332,11 +329,7 @@ fun ButtonCombinations(
             AccentedButton(
                 onClick = {
                     viewModel.resetState()
-                    navController.navigate("wallet_main") {
-                        popUpTo("wallet_main") {
-                            inclusive = true
-                        }
-                    }
+                    navController.popBackStack()
                 },
                 text = "Kembali",
                 modifier = Modifier
@@ -344,12 +337,9 @@ fun ButtonCombinations(
             )
             AccentedButton(
                 onClick = {
-                    viewModel.upsertWallet()
-                    viewModel.resetState()
-                    navController.navigate("wallet_main") {
-                        popUpTo("wallet_main") {
-                            inclusive = true
-                        }
+                    if(viewModel.upsertWallet(context) == null) {
+                        viewModel.resetState()
+                        navController.popBackStack()
                     }
                 },
                 text = "Tambah",

@@ -39,7 +39,7 @@ import com.bleh.monify.feature_more.category.CategoryViewModel
 import com.bleh.monify.feature_more.more.MoreViewModel
 import com.bleh.monify.feature_more.more.MoreScreen
 import com.bleh.monify.feature_wallet.WalletViewModel
-import com.bleh.monify.feature_wallet.add.EditWalletScreen
+import com.bleh.monify.feature_wallet.edit.EditWalletScreen
 import com.bleh.monify.feature_wallet.wallet.WalletScreen
 import com.bleh.monify.ui.theme.MonifyTheme
 import dagger.hilt.android.AndroidEntryPoint

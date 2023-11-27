@@ -1,5 +1,9 @@
 package com.bleh.monify.feature_wallet
 
+import android.content.Context
+import android.util.Log
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bleh.monify.core.daos.WalletDao
@@ -12,6 +16,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.lang.NumberFormatException
 import javax.inject.Inject
 
 data class WalletState(
@@ -86,18 +91,30 @@ class WalletViewModel @Inject constructor(
         }
     }
 
-    fun upsertWallet () {
+    fun upsertWallet(context: Context): Exception? {
+        var err: Exception? = null
         viewModelScope.launch {
-            walletDao.upsertWallet(
-                Wallet(
-                    id = if(state.value.isEdit) state.value.currentEditId else 0,
-                    userId = 1,
-                    name = state.value.walletName,
-                    balance = state.value.walletNominal.toDouble(),
-                    icon = walletIconList()[state.value.selectedWallet]
-                ),
-            )
+            try {
+                walletDao.upsertWallet(
+                    Wallet(
+                        id = if(state.value.isEdit) state.value.currentEditId else 0,
+                        userId = 1,
+                        name = state.value.walletName,
+                        balance = state.value.walletNominal.toDouble(),
+                        icon = walletIconList()[state.value.selectedWallet]
+                    ),
+                )
+            } catch (e: NumberFormatException) {
+                Log.d("WalletViewModel", "upsertWallet: $e")
+                Toast.makeText(context, "There is a problem with the input", Toast.LENGTH_LONG).show()
+                err = e
+            } catch (e: Exception) {
+                Log.d("WalletViewModel", "upsertWallet: $e")
+                Toast.makeText(context, "Unexpected Error", Toast.LENGTH_SHORT).show()
+                err = e
+            }
         }
+        return err
     }
 
     fun setDeletedTrue (id: Int) {

@@ -180,6 +180,7 @@ fun WalletListItem(
                 .clickable {
                     onClick()
                 }
+                .padding(vertical = 5.dp)
         ) {
             Image(
                 painter = painterResource(id = icon),
@@ -205,7 +206,6 @@ fun WalletListItem(
             thickness = 1.dp,
             color = Color.Black,
             modifier = Modifier
-                .padding(vertical = 5.dp)
         )
     }
 }

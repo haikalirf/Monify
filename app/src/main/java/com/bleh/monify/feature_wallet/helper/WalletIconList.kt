@@ -6,6 +6,7 @@ fun walletIconList(): List<Int> {
     return listOf(
         R.drawable.bca,
         R.drawable.bri,
+        R.drawable.bsi,
         R.drawable.dana,
         R.drawable.gopay,
         R.drawable.ovo,
