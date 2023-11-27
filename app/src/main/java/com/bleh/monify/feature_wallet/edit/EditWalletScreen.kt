@@ -50,6 +50,7 @@ import androidx.navigation.NavController
 import com.bleh.monify.R
 import com.bleh.monify.core.helper.indonesianFormatter
 import com.bleh.monify.core.ui_components.AccentedButton
+import com.bleh.monify.core.ui_components.ButtonCombinations
 import com.bleh.monify.feature_wallet.WalletViewModel
 import com.bleh.monify.feature_wallet.helper.walletIconList
 import com.bleh.monify.ui.theme.Grey
@@ -127,7 +128,7 @@ fun AddWalletCard(
     modifier: Modifier = Modifier
 ) {
     val state by viewModel.state.collectAsState()
-    val formatter = indonesianFormatter()
+    val context = LocalContext.current
     Column(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start,
@@ -209,8 +210,28 @@ fun AddWalletCard(
                 .weight(1f)
         )
         ButtonCombinations(
-            viewModel = viewModel,
-            navController = navController,
+            backButton = {
+                viewModel.resetState()
+                navController.popBackStack()
+            },
+            addButton = {
+                if(viewModel.upsertWallet(context) == null) {
+                    viewModel.resetState()
+                    navController.popBackStack()
+                }
+            },
+            saveButton = {
+                if(viewModel.upsertWallet(context) == null) {
+                    viewModel.resetState()
+                    navController.popBackStack()
+                }
+            },
+            deleteButton = {
+                viewModel.setDeletedTrue(state.currentEditId)
+                viewModel.resetState()
+                navController.popBackStack()
+            },
+            isEdit = state.isEdit,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 20.dp)
@@ -278,74 +299,5 @@ fun WalletItem(
             modifier = Modifier
                 .size(36.dp)
         )
-    }
-}
-
-@Composable
-fun ButtonCombinations(
-    viewModel: WalletViewModel,
-    navController: NavController,
-    modifier: Modifier = Modifier
-) {
-    val state by viewModel.state.collectAsState()
-    val context = LocalContext.current
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceAround,
-        modifier = modifier
-    ) {
-        if(state.isEdit) {
-            AccentedButton(
-                onClick = {
-                    viewModel.resetState()
-                    navController.popBackStack()
-                },
-                text = "Kembali",
-                modifier = Modifier
-                    .size(120.dp, 50.dp)
-            )
-            AccentedButton(
-                onClick = {
-                    if(viewModel.upsertWallet(context)== null) {
-                        viewModel.resetState()
-                        navController.popBackStack()
-                    }
-                },
-                text = "Simpan",
-                modifier = Modifier
-                    .size(120.dp, 50.dp)
-            )
-            AccentedButton(
-                onClick = {
-                    viewModel.setDeletedTrue(state.currentEditId)
-                    viewModel.resetState()
-                    navController.popBackStack()
-                },
-                text = "Hapus",
-                modifier = Modifier
-                    .size(120.dp, 50.dp)
-            )
-        } else {
-            AccentedButton(
-                onClick = {
-                    viewModel.resetState()
-                    navController.popBackStack()
-                },
-                text = "Kembali",
-                modifier = Modifier
-                    .size(160.dp, 50.dp)
-            )
-            AccentedButton(
-                onClick = {
-                    if(viewModel.upsertWallet(context) == null) {
-                        viewModel.resetState()
-                        navController.popBackStack()
-                    }
-                },
-                text = "Tambah",
-                modifier = Modifier
-                    .size(160.dp, 50.dp)
-            )
-        }
     }
 }

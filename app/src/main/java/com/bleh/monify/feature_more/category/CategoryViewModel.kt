@@ -14,6 +14,7 @@ data class CategoryState(
     val categoryName: String = "testemail@gmail.com",
     val selectedCategory: Int = 0,
     val addCategoryType: CategoryType = CategoryType.OUTCOME,
+    val isEdit: Boolean = false,
 )
 
 @HiltViewModel
@@ -52,6 +53,7 @@ class CategoryViewModel @Inject constructor(
             it.copy(
                 categoryName = "",
                 selectedCategory = 0,
+                
             )
         }
     }

@@ -26,13 +26,13 @@ class Converters {
         return categoryType.name
     }
 
-    @TypeConverter
-    fun stringToBudgetType(string: String): BudgetType {
-        return BudgetType.valueOf(string)
-    }
-
-    @TypeConverter
-    fun budgetTypeToString(budgetType: BudgetType): String {
-        return budgetType.name
-    }
+//    @TypeConverter
+//    fun stringToBudgetType(string: String): BudgetType {
+//        return BudgetType.valueOf(string)
+//    }
+//
+//    @TypeConverter
+//    fun budgetTypeToString(budgetType: BudgetType): String {
+//        return budgetType.name
+//    }
 }

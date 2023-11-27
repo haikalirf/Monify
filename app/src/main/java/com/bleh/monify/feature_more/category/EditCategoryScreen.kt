@@ -1,7 +1,6 @@
 package com.bleh.monify.feature_more.category
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -42,12 +41,12 @@ import androidx.navigation.compose.rememberNavController
 import com.bleh.monify.R
 import com.bleh.monify.core.enums.CategoryType
 import com.bleh.monify.core.ui_components.AccentedButton
+import com.bleh.monify.core.ui_components.ButtonCombinations
 import com.bleh.monify.feature_book.add.CategoryItem
 
 @Composable
-@OptIn(ExperimentalFoundationApi::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-fun AddCategoryScreen(
+fun EditCategoryScreen(
     navController: NavController,
     viewModel: CategoryViewModel,
 ) {
@@ -64,11 +63,12 @@ fun AddCategoryScreen(
             modifier = Modifier
                 .fillMaxSize()
         ) {
-            AddCategoryComposable(
+            EditCategoryComposable(
+                viewModel = viewModel,
                 categoryType = state.addCategoryType,
                 modifier = Modifier.padding(top = 60.dp)
             )
-            AddCategoryCard(
+            EditCategoryCard(
                 viewModel = viewModel,
                 categoryType = state.addCategoryType,
                 navController = navController
@@ -78,10 +78,12 @@ fun AddCategoryScreen(
 }
 
 @Composable
-fun AddCategoryComposable(
+fun EditCategoryComposable(
+    viewModel: CategoryViewModel,
     categoryType: CategoryType,
     modifier: Modifier = Modifier
 ) {
+    val state by viewModel.state.collectAsState()
     Card(
         colors = CardDefaults.cardColors(
             containerColor = Color.White
@@ -97,8 +99,13 @@ fun AddCategoryComposable(
             modifier = Modifier
                 .fillMaxSize()
         ) {
+            val titleText = if(state.isEdit) {
+                "Ubah / Hapus Kategori " + categoryType.categoryName
+            } else {
+                "Tambah Kategori " + categoryType.categoryName
+            }
             Text(
-                text = "Tambah Kategori " + categoryType.categoryName,
+                text = titleText,
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.titleMedium,
             )
@@ -107,7 +114,7 @@ fun AddCategoryComposable(
 }
 
 @Composable
-fun AddCategoryCard(
+fun EditCategoryCard(
     viewModel: CategoryViewModel,
     categoryType: CategoryType,
     navController: NavController,
@@ -151,32 +158,15 @@ fun AddCategoryCard(
             style = MaterialTheme.typography.bodyLarge,
         )
         AddCategoryGrid(viewModel = viewModel, modifier = Modifier.weight(1f))
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceAround,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 20.dp)
-        ) {
-            AccentedButton(
-                onClick = {
-                    navController.navigate("category_main") {
-                        popUpTo("category_main") {
-                            inclusive = true
-                        }
-                    }
-                },
-                text = "Kembali",
-                modifier = Modifier
-                    .size(160.dp, 50.dp)
-            )
-            AccentedButton(
-                onClick = { /*TODO*/ },
-                text = "Tambah",
-                modifier = Modifier
-                    .size(160.dp, 50.dp)
-            )
-        }
+        ButtonCombinations(
+            backButton = {
+                viewModel.resetInputState()
+            },
+            addButton = { /*TODO*/ },
+            saveButton = { /*TODO*/ },
+            deleteButton = { /*TODO*/ },
+            isEdit = state.isEdit
+        )
     }
 }
 
@@ -217,5 +207,5 @@ fun AddCategoryGrid(
 //@Preview
 @Composable
 fun PreviewAddCategoryScreen() {
-    AddCategoryScreen(navController = rememberNavController(), viewModel = CategoryViewModel())
+    EditCategoryScreen(navController = rememberNavController(), viewModel = CategoryViewModel())
 }

@@ -50,7 +50,6 @@ fun AnalysisScreen(
     viewModel: AnalysisViewModel,
 ) {
     val state by viewModel.state.collectAsState()
-    val coroutineScope = rememberCoroutineScope()
     Scaffold(
         bottomBar = {
             BottomBar(

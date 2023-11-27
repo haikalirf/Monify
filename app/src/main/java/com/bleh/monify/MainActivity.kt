@@ -15,7 +15,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import com.bleh.monify.core.daos.BaseDao
-import com.bleh.monify.core.daos.BudgetDao
 import com.bleh.monify.core.daos.CategoryDao
 import com.bleh.monify.core.daos.TransactionDao
 import com.bleh.monify.core.daos.UserDao
@@ -33,7 +32,7 @@ import com.bleh.monify.feature_book.book.BookScreen
 import com.bleh.monify.feature_book.add.AddBookScreen
 import com.bleh.monify.feature_more.budget.BudgetViewModel
 import com.bleh.monify.feature_more.budget.BudgetScreen
-import com.bleh.monify.feature_more.category.AddCategoryScreen
+import com.bleh.monify.feature_more.category.EditCategoryScreen
 import com.bleh.monify.feature_more.category.CategoryScreen
 import com.bleh.monify.feature_more.category.CategoryViewModel
 import com.bleh.monify.feature_more.more.MoreViewModel
@@ -57,8 +56,6 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var userDao: UserDao
     @Inject
-    lateinit var budgetDao: BudgetDao
-    @Inject
     lateinit var walletDao: WalletDao
     @Inject
     lateinit var transactionDao: TransactionDao
@@ -73,7 +70,6 @@ class MainActivity : ComponentActivity() {
             baseDao.deleteAllPrimaryKeys()
             val mockData = MockData(
                 userDao = userDao,
-                budgetDao = budgetDao,
                 walletDao = walletDao,
                 transactionDao = transactionDao,
                 categoryDao = categoryDao
@@ -133,7 +129,7 @@ class MainActivity : ComponentActivity() {
                             }
                             composable("category_add") {
                                 val viewModel = it.sharedViewModel<CategoryViewModel>(navController = navController)
-                                AddCategoryScreen(navController = navController, viewModel = viewModel)
+                                EditCategoryScreen(navController = navController, viewModel = viewModel)
                             }
                         }
                         navigation(startDestination = "budget_main", route = "budget") {

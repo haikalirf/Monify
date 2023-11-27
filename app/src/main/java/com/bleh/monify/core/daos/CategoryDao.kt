@@ -15,7 +15,7 @@ import javax.inject.Inject
 @Dao
 abstract class CategoryDao: BudgetDao {
     @Upsert
-    abstract suspend fun _upsertCategory(category: Category)
+    abstract suspend fun _upsertCategory(category: Category): Long
 
 //    @Delete
 //    suspend fun deleteCategory(category: Category)
@@ -25,20 +25,15 @@ abstract class CategoryDao: BudgetDao {
 
     @Transaction
     open suspend fun upsertCategoryWithBudget(category: Category) {
-        _upsertCategory(category)
+        val id = _upsertCategory(category)
         if(category.type == CategoryType.OUTCOME) {
             upsertBudget(
                 Budget(
-                    categoryId = category.id,
-                    type = BudgetType.MONTHLY,
-                    used = 0.0,
-                )
-            )
-            upsertBudget(
-                Budget(
-                    categoryId = category.id,
-                    type = BudgetType.WEEKLY,
-                    used = 0.0,
+                    categoryId = id.toInt(),
+                    weeklyAmount = null,
+                    weeklyUsed = 0.0,
+                    monthlyAmount = null,
+                    monthlyUsed = 0.0
                 )
             )
         }

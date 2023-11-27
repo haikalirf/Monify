@@ -15,7 +15,6 @@ import javax.inject.Inject
 
 class MockData @Inject constructor(
     private val userDao: UserDao,
-    private val budgetDao: BudgetDao,
     private val walletDao: WalletDao,
     private val transactionDao: TransactionDao,
     private val categoryDao: CategoryDao
@@ -159,7 +158,7 @@ class MockData @Inject constructor(
             )
         }
         categoryList.forEach {
-            categoryDao._upsertCategory(
+            categoryDao.upsertCategoryWithBudget(
                 it
             )
         }

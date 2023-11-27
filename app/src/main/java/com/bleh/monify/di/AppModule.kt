@@ -41,7 +41,9 @@ object AppModule {
             appContext,
             AppDatabase::class.java,
             "room_database"
-        ).allowMainThreadQueries().build()
+        )
+            .allowMainThreadQueries()
+            .build()
     }
     //TODO remove main thread query
 

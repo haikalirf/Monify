@@ -24,7 +24,8 @@ data class Budget (
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
     val categoryId: Int,
-    val type: BudgetType,
-    val amount: Double? = null,
-    val used: Double,
+    val weeklyAmount: Double? = null,
+    val weeklyUsed: Double,
+    val monthlyAmount: Double? = null,
+    val monthlyUsed: Double
 )
