@@ -22,7 +22,7 @@ import androidx.room.PrimaryKey
 data class Wallet(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
-    val userId: Int,
+    val userId: String,
     val name: String,
     val balance: Double,
     val icon: Int,

@@ -1,11 +1,15 @@
 package com.bleh.monify.feature_more.category
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,6 +22,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -26,12 +31,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.paint
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.style.TextAlign
@@ -43,6 +50,8 @@ import com.bleh.monify.core.enums.CategoryType
 import com.bleh.monify.core.ui_components.AccentedButton
 import com.bleh.monify.core.ui_components.ButtonCombinations
 import com.bleh.monify.feature_book.add.CategoryItem
+import com.bleh.monify.feature_more.category.helper.categoryIconList
+import com.bleh.monify.ui.theme.Grey
 
 @Composable
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -65,12 +74,11 @@ fun EditCategoryScreen(
         ) {
             EditCategoryComposable(
                 viewModel = viewModel,
-                categoryType = state.addCategoryType,
+                categoryType = state.categoryType,
                 modifier = Modifier.padding(top = 60.dp)
             )
             EditCategoryCard(
                 viewModel = viewModel,
-                categoryType = state.addCategoryType,
                 navController = navController
             )
         }
@@ -100,6 +108,7 @@ fun EditCategoryComposable(
                 .fillMaxSize()
         ) {
             val titleText = if(state.isEdit) {
+                Log.d("EditCategoryComposable", "Category Type: ${categoryType.categoryName}")
                 "Ubah / Hapus Kategori " + categoryType.categoryName
             } else {
                 "Tambah Kategori " + categoryType.categoryName
@@ -116,12 +125,12 @@ fun EditCategoryComposable(
 @Composable
 fun EditCategoryCard(
     viewModel: CategoryViewModel,
-    categoryType: CategoryType,
     navController: NavController,
     modifier: Modifier = Modifier
 ) {
     val state by viewModel.state.collectAsState()
     val name = state.categoryName
+    val context = LocalContext.current
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -161,11 +170,29 @@ fun EditCategoryCard(
         ButtonCombinations(
             backButton = {
                 viewModel.resetInputState()
+                navController.popBackStack()
             },
-            addButton = { /*TODO*/ },
-            saveButton = { /*TODO*/ },
-            deleteButton = { /*TODO*/ },
-            isEdit = state.isEdit
+            addButton = {
+                if(viewModel.upsertCategory(context) == null) {
+                    viewModel.resetInputState()
+                    navController.popBackStack()
+                }
+            },
+            saveButton = {
+                if(viewModel.upsertCategory(context) == null) {
+                    viewModel.resetInputState()
+                    navController.popBackStack()
+                }
+            },
+            deleteButton = {
+                viewModel.setDeletedTrue(state.currentEditId)
+                viewModel.resetInputState()
+                navController.popBackStack()
+            },
+            isEdit = state.isEdit,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 20.dp)
         )
     }
 }
@@ -176,8 +203,10 @@ fun AddCategoryGrid(
     modifier: Modifier = Modifier
 ) {
     val state by viewModel.state.collectAsState()
+    val iconList = categoryIconList()
     LazyVerticalGrid(
         columns = GridCells.Fixed(4),
+        contentPadding = PaddingValues(vertical = 20.dp),
         modifier = modifier
             .border(
                 width = 1.dp,
@@ -186,26 +215,45 @@ fun AddCategoryGrid(
             )
             .padding(horizontal = 20.dp)
     ) {
-        items(4) {
-            Spacer(modifier = Modifier.size(20.dp))
-        }
-        items(30) {
-            CategoryItem(
-                icon = R.drawable.ic_paper_checkmark,
-                text = "Makanan & Minuman",
-                isSelected = it == state.selectedCategory
-            ) {
-                viewModel.updateSelectedCategory(it)
+        iconList.forEachIndexed { index, it ->
+            item {
+                CategoryItem(
+                    icon = it,
+                    isSelected = index == state.selectedCategory
+                ) {
+                    viewModel.updateSelectedCategory(index)
+                }
             }
-        }
-        items(4) {
-            Spacer(modifier = Modifier.size(20.dp))
         }
     }
 }
 
-//@Preview
 @Composable
-fun PreviewAddCategoryScreen() {
-    EditCategoryScreen(navController = rememberNavController(), viewModel = CategoryViewModel())
+fun CategoryItem(
+    icon: Int,
+    isSelected: Boolean,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    val backgroundColor = if (isSelected) Grey else Color.Transparent
+    Column(
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+            ) {
+                onClick()
+            }
+            .clip(RoundedCornerShape(10.dp))
+            .background(backgroundColor)
+            .padding(10.dp)
+            .size(70.dp)
+    ) {
+        Icon(
+            painter = painterResource(id = icon),
+            contentDescription = ""
+        )
+    }
 }

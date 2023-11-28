@@ -47,13 +47,13 @@ import java.time.LocalDate
 data class Transaction(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
-    val userId: Int,
+    val userId: String,
     val walletFromId: Int,
-    val walletToId: Int,
+    val walletToId: Int?,
     val categoryId: Int,
     val isTransfer: Boolean,
     val description: String,
     val balance: Double,
-    val admin: Double,
+    val admin: Double?,
     val date: LocalDate
 )

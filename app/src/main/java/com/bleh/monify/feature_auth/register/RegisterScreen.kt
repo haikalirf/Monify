@@ -47,6 +47,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.bleh.monify.R
+import com.bleh.monify.core.entities.User
 import com.bleh.monify.core.ui_components.AccentedButton
 import com.bleh.monify.feature_auth.AuthViewModel
 import kotlinx.coroutines.launch
@@ -107,6 +108,12 @@ fun RegisterScreen(
                             Toast.LENGTH_SHORT
                         ).show()
                         if (error == null) {
+                            viewModel.upsertUser(
+                                User(
+                                    id = signUpResult.data!!.userId,
+                                    email = signUpResult.data.email?: "",
+                                )
+                            )
                             viewModel.resetState()
                             navController.navigate("login")
                         }
@@ -127,7 +134,6 @@ fun RegisterScreen(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterCard(
     modifier: Modifier = Modifier,

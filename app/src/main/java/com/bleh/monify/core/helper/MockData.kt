@@ -1,7 +1,5 @@
 package com.bleh.monify.core.helper
 
-import com.bleh.monify.R
-import com.bleh.monify.core.daos.BudgetDao
 import com.bleh.monify.core.daos.CategoryDao
 import com.bleh.monify.core.daos.TransactionDao
 import com.bleh.monify.core.daos.UserDao
@@ -11,6 +9,11 @@ import com.bleh.monify.core.entities.Transaction
 import com.bleh.monify.core.entities.User
 import com.bleh.monify.core.entities.Wallet
 import com.bleh.monify.core.enums.CategoryType
+import com.bleh.monify.feature_more.category.helper.categoryIconList
+import com.bleh.monify.feature_wallet.helper.walletIconList
+import io.github.serpro69.kfaker.Faker
+import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 import javax.inject.Inject
 
 class MockData @Inject constructor(
@@ -19,136 +22,63 @@ class MockData @Inject constructor(
     private val transactionDao: TransactionDao,
     private val categoryDao: CategoryDao
 ) {
-    val walletList = listOf<Wallet>(
+    private val faker = Faker()
+    private val walletIconList = walletIconList()
+    private val categoryIconList = categoryIconList()
+    private val walletList = walletIconList.map {
         Wallet(
-            userId = 1,
-            name = "BCA",
-            balance = 5000000.0,
-            icon = R.drawable.bca,
+            userId = "pijBlqHvlmWJkUO8LWckenhzob02",
+            name = faker.random.randomString(min = 5, max = 20),
+            balance = faker.random.nextInt(min = 10000, max = 100000000) + faker.random.nextDouble(),
+            icon = it,
             isDeleted = false
-        ),
-        Wallet(
-            userId = 1,
-            name = "Dana",
-            balance = 1000000.0,
-            icon = R.drawable.dana,
-            isDeleted = false
-        ),
-        Wallet(
-            userId = 1,
-            name = "Gopay",
-            balance = 2000000.0,
-            icon = R.drawable.gopay,
-            isDeleted = false
-        ),
-    )
-    val categoryList = listOf<Category>(
+        )
+    }
+    private val categoryList = categoryIconList.map {
         Category(
-            userId = 1,
-            name = "Belanja",
-            type = CategoryType.OUTCOME,
-            icon = R.drawable.ic_shopping_cart,
+            userId = "pijBlqHvlmWJkUO8LWckenhzob02",
+            name = faker.random.randomString(min = 5, max = 20),
+            type = faker.random.nextEnum<CategoryType>(),
+            icon = it,
             isDeleted = false
-        ),
-        Category(
-            userId = 1,
-            name = "Kesehatan",
-            type = CategoryType.OUTCOME,
-            icon = R.drawable.ic_health,
-            isDeleted = false
-        ),
-        Category(
-            userId = 1,
-            name = "Laundry",
-            type = CategoryType.OUTCOME,
-            icon = R.drawable.ic_shirt,
-            isDeleted = false
-        ),
-        Category(
-            userId = 1,
-            name = "Listrik",
-            type = CategoryType.OUTCOME,
-            icon = R.drawable.ic_electricity,
-            isDeleted = false
-        ),
-        Category(
-            userId = 1,
-            name = "Makanan & Minuman",
-            type = CategoryType.OUTCOME,
-            icon = R.drawable.ic_food,
-            isDeleted = false
-        ),
-        Category(
-            userId = 1,
-            name = "Olahraga",
-            type = CategoryType.OUTCOME,
-            icon = R.drawable.ic_gym,
-            isDeleted = false
-        ),
-        Category(
-            userId = 1,
-            name = "Paket Data",
-            type = CategoryType.OUTCOME,
-            icon = R.drawable.ic_mobile_data,
-            isDeleted = false
-        ),
-        Category(
-            userId = 1,
-            name = "Pendidikan",
-            type = CategoryType.OUTCOME,
-            icon = R.drawable.ic_education,
-            isDeleted = false
-        ),
-        Category(
-            userId = 1,
-            name = "Transportasi",
-            type = CategoryType.OUTCOME,
-            icon = R.drawable.ic_transportation,
-            isDeleted = false
-        ),
-        Category(
-            userId = 1,
-            name = "WiFi",
-            type = CategoryType.OUTCOME,
-            icon = R.drawable.ic_wifi,
-            isDeleted = false
-        ),
-        Category(
-            userId = 1,
-            name = "Gaji",
-            type = CategoryType.INCOME,
-            icon = R.drawable.ic_person_blackboard,
-            isDeleted = false
-        ),
-        Category(
-            userId = 1,
-            name = "Uang Bulanan",
-            type = CategoryType.INCOME,
-            icon = R.drawable.ic_money,
-            isDeleted = false
-        ),
-        Category(
-            userId = 1,
-            name = "Beasiswa",
-            type = CategoryType.INCOME,
-            icon = R.drawable.ic_paper_checkmark,
-            isDeleted = false
-        ),
-    )
-//    val transactionList = listOf<Transaction>(
-//        Transaction(
-//            userId = 1,
-//            walletId = 1,
-//            categoryId = 1,
-//            amount = 100000.0,
-//            description = "Makanan",
-//            isDeleted = false
-//        ),
-//    )
+        )
+    }
+    private val transactionList = List(30) {
+        Transaction(
+            userId = "pijBlqHvlmWJkUO8LWckenhzob02",
+            walletFromId = faker.random.nextInt(min = 1, max = 3),
+            walletToId = null,
+            categoryId = faker.random.nextInt(min = 1, max = 13),
+            isTransfer = false,
+            description = faker.random.randomString(min = 5, max = 20),
+            balance = faker.random.nextInt(min = 10000, max = 10000000) + faker.random.nextDouble(),
+            admin = null,
+            date = LocalDate.now().minus(
+                faker.random.nextInt(min = 0, max = 5).toLong(),
+                ChronoUnit.DAYS
+            )
+        )
+    }
+    private val transferList = List(10) {
+        Transaction(
+            userId = "pijBlqHvlmWJkUO8LWckenhzob02",
+            walletFromId = faker.random.nextInt(min = 1, max = 3),
+            walletToId = faker.random.nextInt(min = 1, max = 3),
+            categoryId = faker.random.nextInt(min = 1, max = 13),
+            isTransfer = true,
+            description = faker.random.randomString(min = 5, max = 20),
+            balance = faker.random.nextInt(min = 10000, max = 10000000) + faker.random.nextDouble(),
+            admin = faker.random.nextInt(min = 1000, max = 10000) + faker.random.nextDouble(),
+            date = LocalDate.now().minus(
+                faker.random.nextInt(min = 0, max = 5).toLong(),
+                ChronoUnit.DAYS
+            )
+        )
+    }
     suspend fun insertMockData() {
         userDao.upsertUser(
             User(
-                id = 1,
+                id = "pijBlqHvlmWJkUO8LWckenhzob02",
                 email = "fakeEmail"
             )
         )
@@ -159,6 +89,16 @@ class MockData @Inject constructor(
         }
         categoryList.forEach {
             categoryDao.upsertCategoryWithBudget(
+                it
+            )
+        }
+        transactionList.forEach {
+            transactionDao.upsertTransaction(
+                it
+            )
+        }
+        transferList.forEach {
+            transactionDao.upsertTransaction(
                 it
             )
         }

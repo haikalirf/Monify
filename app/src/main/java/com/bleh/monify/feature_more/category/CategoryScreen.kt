@@ -1,6 +1,7 @@
 package com.bleh.monify.feature_more.category
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -46,6 +47,8 @@ import com.bleh.monify.core.enums.CategoryType
 import com.bleh.monify.core.ui_components.AccentedButton
 import com.bleh.monify.core.ui_components.SelectionBar
 import com.bleh.monify.core.ui_components.TabTitle
+import com.bleh.monify.feature_more.category.helper.categoryIconList
+import com.bleh.monify.feature_wallet.helper.walletIconList
 import com.bleh.monify.ui.theme.Accent
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -78,6 +81,7 @@ fun CategoryScreen(
             }
             viewModel.resetInputState()
             viewModel.updateCategoryType(categoryType)
+            Log.d("CategoryScreen", "Category Type: ${categoryType.categoryName}")
         }
         val animationSpec: AnimationSpec<Float> = tween(durationMillis = 250, easing = FastOutSlowInEasing)
         LaunchedEffect(state.categoryType) {
@@ -139,6 +143,7 @@ fun CategoryCard(
     modifier: Modifier = Modifier
 ) {
     val state by viewModel.state.collectAsState()
+    val iconList = categoryIconList()
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween,
@@ -152,14 +157,21 @@ fun CategoryCard(
             modifier = modifier
                 .weight(1f)
         ) {
-            item {
-                CategoryColumnItem(icon = R.drawable.ic_money, name = "Uang Bulanan") {
-
-                }
-            }
-            item {
-                CategoryColumnItem(icon = R.drawable.ic_person_blackboard, name = "Gaji") {
-
+            state.categories.forEach { category ->
+                if (category.type == categoryType && !category.isDeleted) {
+                    item {
+                        CategoryColumnItem(
+                            icon = category.icon,
+                            name = category.name,
+                            onCategoryClicked = {
+                                viewModel.updateIsEditState(true)
+                                viewModel.updateCategoryName(category.name)
+                                viewModel.updateSelectedCategory(iconList.indexOf(category.icon))
+                                viewModel.updateCurrentEditIdState(category.id)
+                                navController.navigate("category_add")
+                            }
+                        )
+                    }
                 }
             }
         }
@@ -184,7 +196,7 @@ fun CategoryCard(
             )
             AccentedButton(
                 onClick = {
-                    viewModel.updateAddCategoryType(categoryType)
+                    viewModel.updateCategoryType(categoryType)
                     navController.navigate("category_add")
                 },
                 text = "Tambah",
@@ -237,10 +249,4 @@ fun CategoryColumnItem(
             color = Color.Black
         )
     }
-}
-
-//@Preview(showBackground = true)
-@Composable
-fun CategoryScreenPreview() {
-    CategoryScreen(navController = rememberNavController(), viewModel = CategoryViewModel())
 }

@@ -1007,12 +1007,3 @@ fun CategoryItem(
         )
     }
 }
-
-//@Preview(showSystemUi = true)
-@Composable
-fun PreviewAddBookScreen() {
-    AddBookScreen(
-        navController = NavController(LocalContext.current),
-        viewModel = BookViewModel()
-    )
-}

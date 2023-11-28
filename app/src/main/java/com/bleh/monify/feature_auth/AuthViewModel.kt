@@ -3,10 +3,14 @@ package com.bleh.monify.feature_auth
 import android.content.Context
 import android.widget.Toast
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.bleh.monify.core.daos.UserDao
+import com.bleh.monify.core.entities.User
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class AuthState(
@@ -17,7 +21,8 @@ data class AuthState(
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
-    private val authUiClient: GoogleAuthClient
+    private val authUiClient: GoogleAuthClient,
+    private val userDao: UserDao
 ): ViewModel() {
     private val _state = MutableStateFlow(AuthState())
     val state = _state.asStateFlow()
@@ -77,6 +82,14 @@ class AuthViewModel @Inject constructor(
         _state.update {
             it.copy(
                 isUserLoggedIn = userData != null,
+            )
+        }
+    }
+
+    fun upsertUser(user: User) {
+        viewModelScope.launch {
+            userDao.upsertUser(
+                user
             )
         }
     }

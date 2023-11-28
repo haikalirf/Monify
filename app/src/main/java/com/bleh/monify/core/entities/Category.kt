@@ -23,7 +23,7 @@ import com.bleh.monify.core.enums.CategoryType
 data class Category (
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
-    val userId: Int,
+    val userId: String,
     val name: String,
     val type: CategoryType,
     val icon: Int,

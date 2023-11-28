@@ -30,6 +30,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
     compileOptions {
@@ -98,6 +99,9 @@ dependencies {
 
     // Shimmer
     implementation("com.valentinilk.shimmer:compose-shimmer:1.2.0")
+
+    // faker
+    implementation("io.github.serpro69:kotlin-faker:1.14.0")
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")

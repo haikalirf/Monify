@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bleh.monify.core.daos.WalletDao
 import com.bleh.monify.core.entities.Wallet
+import com.bleh.monify.feature_auth.GoogleAuthClient
 import com.bleh.monify.feature_wallet.helper.walletIconList
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -31,10 +32,13 @@ data class WalletState(
 
 @HiltViewModel
 class WalletViewModel @Inject constructor(
+    private val googleAuthClient: GoogleAuthClient,
     private val walletDao: WalletDao
 ): ViewModel() {
     private val _state = MutableStateFlow(WalletState())
     val state = _state.asStateFlow()
+
+    private val currentUser = googleAuthClient.getLoggedInUser()
 
     init {
         getWallets()
@@ -98,7 +102,7 @@ class WalletViewModel @Inject constructor(
                 walletDao.upsertWallet(
                     Wallet(
                         id = if(state.value.isEdit) state.value.currentEditId else 0,
-                        userId = 1,
+                        userId = currentUser!!.userId,
                         name = state.value.walletName,
                         balance = state.value.walletNominal.toDouble(),
                         icon = walletIconList()[state.value.selectedWallet]
