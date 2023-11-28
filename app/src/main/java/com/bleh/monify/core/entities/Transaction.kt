@@ -57,3 +57,18 @@ data class Transaction(
     val admin: Double?,
     val date: LocalDate
 )
+
+fun List<Transaction>.groupedByDay(): Map<LocalDate, List<Transaction>> {
+    val dataMap: MutableMap<LocalDate, MutableList<Transaction>> = mutableMapOf()
+    this.forEach { transaction ->
+        val date = transaction.date
+        if (dataMap[date] == null) {
+            dataMap[date] = mutableListOf()
+        }
+        dataMap[date]!!.add(transaction)
+    }
+    dataMap.values.forEach { dayTransactions ->
+        dayTransactions.sortBy { transaction -> transaction.date }
+    }
+    return dataMap.toSortedMap(compareByDescending { it })
+}

@@ -1,10 +1,17 @@
 package com.bleh.monify.feature_book
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.bleh.monify.core.daos.TransactionDao
+import com.bleh.monify.core.entities.Transaction
+import com.bleh.monify.feature_auth.GoogleAuthClient
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
@@ -31,14 +38,30 @@ data class BookState(
     val walletDestination: TransferWallet? = null,
     val isWalletSourceExpanded: Boolean = false,
     val isWalletDestinationExpanded: Boolean = false,
+    val transactionList: List<Transaction> = listOf(),
 )
 
 @HiltViewModel
 class BookViewModel @Inject constructor(
-
+    private val googleAuthClient: GoogleAuthClient,
+    private val transactionDao: TransactionDao,
 ): ViewModel() {
     private val _state = MutableStateFlow(BookState())
     val state = _state.asStateFlow()
+
+    init {
+        getTransactions()
+    }
+
+    private fun getTransactions() {
+        viewModelScope.launch {
+            transactionDao.getTransactions().flowOn(Dispatchers.IO).collect { transactionList ->
+                _state.update {
+                    it.copy(transactionList = transactionList)
+                }
+            }
+        }
+    }
 
     fun updateSearchState (search: String) {
         _state.update {

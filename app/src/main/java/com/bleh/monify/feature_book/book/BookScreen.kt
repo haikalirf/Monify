@@ -9,6 +9,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -47,6 +48,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.bleh.monify.R
+import com.bleh.monify.core.entities.Transaction
+import com.bleh.monify.core.entities.groupedByDay
 import com.bleh.monify.core.ui_components.BottomBar
 import com.bleh.monify.core.ui_components.FloatingAddButton
 import com.bleh.monify.feature_book.BookViewModel
@@ -131,6 +134,7 @@ fun BookList(
     paddingBottom: Dp,
     modifier: Modifier = Modifier
 ) {
+    val state by viewModel.state.collectAsState()
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -187,14 +191,19 @@ fun BookList(
             }
         }
         LazyColumn(
+            contentPadding = PaddingValues(bottom = paddingBottom+85.dp),
             modifier = Modifier
                 .weight(1f)
         ) {
-            item {
-                BookListPerDay(viewModel = viewModel)
-                BookListPerDay(viewModel = viewModel)
-                BookListPerDay(viewModel = viewModel)
-                Spacer(modifier = Modifier.height(paddingBottom+85.dp))
+            state.transactionList.groupedByDay().forEach { (date, transactions) ->
+                item {
+                    BookListPerDay(
+                        viewModel = viewModel,
+                        transactionList = transactions,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    )
+                }
             }
         }
     }
@@ -203,6 +212,7 @@ fun BookList(
 @Composable
 fun BookListPerDay(
     viewModel: BookViewModel,
+    transactionList: List<Transaction>,
     modifier: Modifier = Modifier
 ) {
     var showList by remember {
@@ -254,51 +264,19 @@ fun BookListPerDay(
             visible = showList
         ) {
             Column {
-                BookListItem(
-                    viewModel = viewModel,
-                    icon = R.drawable.ic_food,
-                    title = "Makanan & Minuman",
-                    note = "MCD (panas 2 Spicy, Medium)",
-                    amount = "-Rp 50,000.00",
-                    amountColor = Red,
-                    wallet = "GoPay"
-                )
-                BookListItem(
-                    viewModel = viewModel,
-                    icon = R.drawable.ic_transportation,
-                    title = "Transportasi",
-                    note = "Pulang Kuliah",
-                    amount = "-Rp 25,000.00",
-                    amountColor = Red,
-                    wallet = "GoPay"
-                )
-                BookListItem(
-                    viewModel = viewModel,
-                    icon = R.drawable.ic_transportation,
-                    title = "Transportasi",
-                    note = "Pergi Kuliah",
-                    amount = "-Rp 25,000.00",
-                    amountColor = Red,
-                    wallet = "GoPay"
-                )
-                BookListItem(
-                    viewModel = viewModel,
-                    icon = R.drawable.ic_person_blackboard,
-                    title = "Gaji",
-                    note = "Gaji Guru les",
-                    amount = "-Rp 1,000,000.00",
-                    amountColor = Green,
-                    wallet = "BCA"
-                )
-                BookListItem(
-                    viewModel = viewModel,
-                    icon = R.drawable.ic_money,
-                    title = "Uang Bulanan",
-                    note = "Dari Orang Tua",
-                    amount = "-Rp 2,000,000.00",
-                    amountColor = Green,
-                    wallet = "BCA"
-                )
+                transactionList.forEach { transaction ->
+                    BookListItem(
+                        viewModel = viewModel,
+                        icon = R.drawable.ic_wallet,
+                        title = transaction.description,
+                        note = transaction.description,
+                        amount = transaction.balance.toString(),
+                        amountColor = if (transaction.balance > 0) Green else Red,
+                        wallet = "Wallet",
+                        modifier = Modifier
+                            .padding(horizontal = 10.dp)
+                    )
+                }
             }
         }
     }
@@ -363,14 +341,5 @@ fun BookListItem(
         modifier = Modifier
             .fillMaxWidth(),
         color = Color.Black
-    )
-}
-
-//@Preview(showSystemUi = true)
-@Composable
-fun BookScreenPreview() {
-    BookScreen(
-        navController = NavController(LocalContext.current),
-        viewModel = BookViewModel(),
     )
 }
