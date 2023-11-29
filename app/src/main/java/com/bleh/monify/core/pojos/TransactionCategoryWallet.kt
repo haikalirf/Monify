@@ -14,7 +14,7 @@ data class TransactionCategoryWallet(
         parentColumn = "categoryId",
         entityColumn = "id"
     )
-    val category: Category,
+    val category: Category?,
     @Relation(
         parentColumn = "walletFromId",
         entityColumn = "id"

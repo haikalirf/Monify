@@ -25,10 +25,11 @@ class MockData @Inject constructor(
     private val faker = Faker()
     private val walletIconList = walletIconList()
     private val categoryIconList = categoryIconList()
+
     private val walletList = walletIconList.map {
         Wallet(
             userId = "pijBlqHvlmWJkUO8LWckenhzob02",
-            name = faker.random.randomString(min = 5, max = 20),
+            name = faker.random.randomString(min = 3, max = 10),
             balance = faker.random.nextInt(min = 10000, max = 100000000) + faker.random.nextDouble(),
             icon = it,
             isDeleted = false
@@ -37,20 +38,20 @@ class MockData @Inject constructor(
     private val categoryList = categoryIconList.map {
         Category(
             userId = "pijBlqHvlmWJkUO8LWckenhzob02",
-            name = faker.random.randomString(min = 5, max = 20),
+            name = faker.random.randomString(min = 5, max = 15),
             type = faker.random.nextEnum<CategoryType>(),
             icon = it,
             isDeleted = false
         )
     }
-    private val transactionList = List(30) {
+    private val transactionList1 = List(15) {
         Transaction(
             userId = "pijBlqHvlmWJkUO8LWckenhzob02",
             walletFromId = faker.random.nextInt(min = 1, max = 3),
             walletToId = null,
             categoryId = faker.random.nextInt(min = 1, max = 13),
             isTransfer = false,
-            description = faker.random.randomString(min = 5, max = 20),
+            description = faker.random.randomString(min = 5, max = 15),
             balance = faker.random.nextInt(min = -10000000, max = 10000000) + faker.random.nextDouble(),
             admin = null,
             date = LocalDate.now().minus(
@@ -64,17 +65,151 @@ class MockData @Inject constructor(
             userId = "pijBlqHvlmWJkUO8LWckenhzob02",
             walletFromId = faker.random.nextInt(min = 1, max = 3),
             walletToId = faker.random.nextInt(min = 1, max = 3),
-            categoryId = faker.random.nextInt(min = 1, max = 13),
+            categoryId = null,
             isTransfer = true,
-            description = faker.random.randomString(min = 5, max = 20),
-            balance = faker.random.nextInt(min = -10000000, max = 10000000) + faker.random.nextDouble(),
-            admin = faker.random.nextInt(min = -10000, max = -1000) + faker.random.nextDouble(),
+            description = faker.random.randomString(min = 5, max = 15),
+            balance = faker.random.nextInt(min = 1000, max = 10000000) + faker.random.nextDouble(),
+            admin = faker.random.nextInt(min = 1000, max = 10000) + faker.random.nextDouble(),
             date = LocalDate.now().minus(
                 faker.random.nextInt(min = 0, max = 5).toLong(),
                 ChronoUnit.DAYS
             )
         )
     }
+    private val transactionList2 = List(15) {
+        Transaction(
+            userId = "pijBlqHvlmWJkUO8LWckenhzob02",
+            walletFromId = faker.random.nextInt(min = 1, max = 3),
+            walletToId = null,
+            categoryId = faker.random.nextInt(min = 1, max = 13),
+            isTransfer = false,
+            description = faker.random.randomString(min = 5, max = 15),
+            balance = faker.random.nextInt(min = -10000000, max = 10000000) + faker.random.nextDouble(),
+            admin = null,
+            date = LocalDate.now().minus(
+                faker.random.nextInt(min = 0, max = 5).toLong(),
+                ChronoUnit.DAYS
+            )
+        )
+    }
+    private val transactionList = transactionList1 + transferList + transactionList2
+
+//    private val walletList = listOf<Wallet>(
+//        Wallet(
+//            userId = "pijBlqHvlmWJkUO8LWckenhzob02",
+//            name = "BCA",
+//            balance = 1000000.0,
+//            icon = walletIconList[0],
+//            isDeleted = false
+//        ),
+//        Wallet(
+//            userId = "pijBlqHvlmWJkUO8LWckenhzob02",
+//            name = "BRI",
+//            balance = 2000000.0,
+//            icon = walletIconList[1],
+//            isDeleted = false
+//        ),
+//        Wallet(
+//            userId = "pijBlqHvlmWJkUO8LWckenhzob02",
+//            name = "BSI",
+//            balance = 500000.0,
+//            icon = walletIconList[2],
+//            isDeleted = false
+//        ),
+//        Wallet(
+//            userId = "pijBlqHvlmWJkUO8LWckenhzob02",
+//            name = "DANA",
+//            balance = 1000000.0,
+//            icon = walletIconList[3],
+//            isDeleted = false
+//        ),
+//        Wallet(
+//            userId = "pijBlqHvlmWJkUO8LWckenhzob02",
+//            name = "GOPAY",
+//            balance = 2000000.0,
+//            icon = walletIconList[4],
+//            isDeleted = false
+//        ),
+//        Wallet(
+//            userId = "pijBlqHvlmWJkUO8LWckenhzob02",
+//            name = "OVO",
+//            balance = 500000.0,
+//            icon = walletIconList[5],
+//            isDeleted = false
+//        ),
+//        Wallet(
+//            userId = "pijBlqHvlmWJkUO8LWckenhzob02",
+//            name = "PANIN",
+//            balance = 1000000.0,
+//            icon = walletIconList[6],
+//            isDeleted = false
+//        ),
+//    )
+//    private val categoryList = listOf<Category>(
+//        Category(
+//            userId = "pijBlqHvlmWJkUO8LWckenhzob02",
+//            name = "Makanan",
+//            type = CategoryType.OUTCOME,
+//            icon = categoryIconList[0],
+//            isDeleted = false
+//        ),
+//        Category(
+//            userId = "pijBlqHvlmWJkUO8LWckenhzob02",
+//            name = "Minuman",
+//            type = CategoryType.OUTCOME,
+//            icon = categoryIconList[1],
+//            isDeleted = false
+//        ),
+//        Category(
+//            userId = "pijBlqHvlmWJkUO8LWckenhzob02",
+//            name = "Transportasi",
+//            type = CategoryType.OUTCOME,
+//            icon = categoryIconList[2],
+//            isDeleted = false
+//        ),
+//        Category(
+//            userId = "pijBlqHvlmWJkUO8LWckenhzob02",
+//            name = "Belanja",
+//            type = CategoryType.OUTCOME,
+//            icon = categoryIconList[3],
+//            isDeleted = false
+//        ),
+//        Category(
+//            userId = "pijBlqHvlmWJkUO8LWckenhzob02",
+//            name = "Hiburan",
+//            type = CategoryType.OUTCOME,
+//            icon = categoryIconList[4],
+//            isDeleted = false
+//        ),
+//        Category(
+//            userId = "pijBlqHvlmWJkUO8LWckenhzob02",
+//            name = "Pendidikan",
+//            type = CategoryType.OUTCOME,
+//            icon = categoryIconList[5],
+//            isDeleted = false
+//        ),
+//        Category(
+//            userId = "pijBlqHvlmWJkUO8LWckenhzob02",
+//            name = "Kesehatan",
+//            type = CategoryType.OUTCOME,
+//            icon = categoryIconList[6],
+//            isDeleted = false
+//        ),
+//        Category(
+//            userId = "pijBlqHvlmWJkUO8LWckenhzob02",
+//            name = "Gaji",
+//            type = CategoryType.INCOME,
+//            icon = categoryIconList[7],
+//            isDeleted = false
+//        ),
+//        Category(
+//            userId = "pijBlqHvlmWJkUO8LWckenhzob02",
+//            name = "Hadiah",
+//            type = CategoryType.INCOME,
+//            icon = categoryIconList[8],
+//            isDeleted = false
+//        ),
+//    )
     suspend fun insertMockData() {
         userDao.upsertUser(
             User(
@@ -93,11 +228,6 @@ class MockData @Inject constructor(
             )
         }
         transactionList.forEach {
-            transactionDao.upsertTransaction(
-                it
-            )
-        }
-        transferList.forEach {
             transactionDao.upsertTransaction(
                 it
             )

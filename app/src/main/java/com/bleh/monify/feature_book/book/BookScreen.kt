@@ -1,8 +1,7 @@
 package com.bleh.monify.feature_book.book
 
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.Indication
-import androidx.compose.foundation.IndicationInstance
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -11,7 +10,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -42,20 +40,18 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.bleh.monify.R
-import com.bleh.monify.core.entities.Transaction
-import com.bleh.monify.core.entities.groupedByDay
 import com.bleh.monify.core.helper.indonesianFormatter
 import com.bleh.monify.core.pojos.TransactionCategoryWallet
 import com.bleh.monify.core.pojos.groupedByDay
 import com.bleh.monify.core.ui_components.BottomBar
 import com.bleh.monify.core.ui_components.FloatingAddButton
 import com.bleh.monify.feature_book.BookViewModel
+import com.bleh.monify.feature_more.category.helper.categoryIconList
 import com.bleh.monify.ui.theme.AccentLight
 import com.bleh.monify.ui.theme.Green
 import com.bleh.monify.ui.theme.Red
@@ -97,6 +93,7 @@ fun BookScreen(
                     .padding(top = 60.dp)
             )
             BookList(
+                navController = navController,
                 viewModel = viewModel,
                 paddingBottom = it.calculateBottomPadding()
             )
@@ -136,11 +133,13 @@ fun SearchBar(
 
 @Composable
 fun BookList(
+    navController: NavController,
     viewModel: BookViewModel,
     paddingBottom: Dp,
     modifier: Modifier = Modifier
 ) {
     val state by viewModel.state.collectAsState()
+    val formatter = indonesianFormatter()
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -177,7 +176,7 @@ fun BookList(
                         style = MaterialTheme.typography.titleMedium
                     )
                     Text(
-                        text = "Rp 0",
+                        text = formatter.format(state.positiveSum),
                         style = MaterialTheme.typography.titleSmall
                     )
                 }
@@ -190,7 +189,7 @@ fun BookList(
                         style = MaterialTheme.typography.titleMedium
                     )
                     Text(
-                        text = "Rp 0",
+                        text = formatter.format(state.negativeSum),
                         style = MaterialTheme.typography.titleSmall
                     )
                 }
@@ -204,6 +203,7 @@ fun BookList(
             state.transactionList.groupedByDay().forEach { (date, transactionList) ->
                 item {
                     BookListPerDay(
+                        navController = navController,
                         viewModel = viewModel,
                         date = date,
                         transactionList = transactionList,
@@ -218,11 +218,13 @@ fun BookList(
 
 @Composable
 fun BookListPerDay(
+    navController: NavController,
     viewModel: BookViewModel,
     date: LocalDate,
     transactionList: List<TransactionCategoryWallet>,
     modifier: Modifier = Modifier
 ) {
+    val state by viewModel.state.collectAsState()
     var showList by remember {
         mutableStateOf(true)
     }
@@ -230,7 +232,7 @@ fun BookListPerDay(
     val localDateFormatter = DateTimeFormatter.ofPattern("dd-MM EEE").withLocale(Locale("id", "ID"))
     //get both positive sum and negative sum
     val positiveSum = transactionList.filter { transactionCategoryWallet ->
-        transactionCategoryWallet.transaction.balance >= 0
+        transactionCategoryWallet.transaction.balance >= 0 && transactionCategoryWallet.category != null
     }.sumOf { transactionCategoryWallet ->
         transactionCategoryWallet.transaction.balance
     }
@@ -285,18 +287,50 @@ fun BookListPerDay(
             visible = showList
         ) {
             Column {
+                val iconList = categoryIconList()
                 transactionList.forEach { transactionCategoryWallet ->
+                    var col = if (transactionCategoryWallet.transaction.balance >= 0) Green else Red
+                    val icon = transactionCategoryWallet.category?.icon?: R.drawable.ic_transfer
+                    var wallet = transactionCategoryWallet.walletFrom.name
+                    val isTransfer = transactionCategoryWallet.transaction.isTransfer
+                    if (isTransfer) {
+                        col = Color.Black
+                        wallet = transactionCategoryWallet.walletFrom.name +
+                                " > " +
+                                transactionCategoryWallet.walletTo!!.name
+                    }
                     BookListItem(
-                        viewModel = viewModel,
-                        icon = transactionCategoryWallet.category.icon,
-                        title = transactionCategoryWallet.category.name,
+                        icon = icon,
+                        title = transactionCategoryWallet.category?.name?: "Transfer",
                         note = transactionCategoryWallet.transaction.description,
                         amount = formatter.format(transactionCategoryWallet.transaction.balance),
-                        amountColor = if (transactionCategoryWallet.transaction.balance >= 0) Green else Red,
-                        wallet = transactionCategoryWallet.walletFrom.name,
+                        amountColor = col,
+                        wallet = wallet,
                         modifier = Modifier
                             .fillMaxWidth()
-                    )
+                    ) {
+                        viewModel.updateIsEditState(true)
+                        viewModel.updateCurrentTransactionId(transactionCategoryWallet.transaction.id)
+                        viewModel.updateNoteState(transactionCategoryWallet.transaction.description)
+                        viewModel.updateNominalState(transactionCategoryWallet.transaction.balance.toString())
+                        viewModel.updatePickedDateState(transactionCategoryWallet.transaction.date)
+                        viewModel.updateFormattedDate(transactionCategoryWallet.transaction.date)
+                        viewModel.updateWalletSource(transactionCategoryWallet.walletFrom)
+                        Log.d("BookScreen", "BookListPerDay: ${transactionCategoryWallet.walletFrom.name}")
+                        when(isTransfer) {
+                            true -> {
+                                viewModel.updateTransactionType(2)
+                                viewModel.updateWalletDestination(transactionCategoryWallet.walletTo!!)
+                                viewModel.updateAdminState(transactionCategoryWallet.transaction.admin.toString())
+                            }
+                            false -> {
+                                viewModel.updateTransactionType(if(transactionCategoryWallet.transaction.balance >= 0) 1 else 0)
+                                viewModel.updateSelectedCategory(iconList.indexOf(icon))
+                                viewModel.updateSelectedCategoryId(transactionCategoryWallet.category!!.id)
+                            }
+                        }
+                        navController.navigate("book_add")
+                    }
                 }
             }
         }
@@ -305,7 +339,6 @@ fun BookListPerDay(
 
 @Composable
 fun BookListItem(
-    viewModel: BookViewModel,
     icon: Int,
     title: String,
     note: String,
@@ -313,13 +346,14 @@ fun BookListItem(
     amountColor: Color,
     wallet: String,
     modifier: Modifier = Modifier,
+    onClick: () -> Unit = {}
 ) {
-    val formatter = indonesianFormatter()
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
             .fillMaxWidth()
             .height(60.dp)
+            .clickable { onClick() }
     ) {
         Icon(
             painter = painterResource(id = icon),
@@ -330,8 +364,8 @@ fun BookListItem(
         )
         Column(
             modifier = Modifier
-                .padding(start = 10.dp)
-                .weight(5f)
+                .padding(start = 5.dp)
+                .weight(4f)
         ) {
             Text(
                 text = title,

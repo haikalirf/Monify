@@ -1,7 +1,8 @@
-package com.bleh.monify.feature_book.add
+package com.bleh.monify.feature_book.edit
 
 import android.annotation.SuppressLint
 import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -15,6 +16,7 @@ import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -29,8 +31,11 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.DatePickerDialog
@@ -51,7 +56,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -62,21 +66,22 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.PlatformTextStyle
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.PopupProperties
 import androidx.navigation.NavController
 import com.bleh.monify.R
-import com.bleh.monify.core.ui_components.AccentedButton
+import com.bleh.monify.core.entities.Wallet
+import com.bleh.monify.core.helper.indonesianFormatter
+import com.bleh.monify.core.ui_components.ButtonCombinations
 import com.bleh.monify.core.ui_components.SelectionBar
 import com.bleh.monify.core.ui_components.TabTitle
 import com.bleh.monify.feature_book.BookViewModel
-import com.bleh.monify.feature_book.TransferWallet
 import com.bleh.monify.ui.theme.Accent
 import com.bleh.monify.ui.theme.Grey
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.ZoneId
 
@@ -89,12 +94,16 @@ enum class TransactionType(val value: Int, val transactionName: String, val icon
 @OptIn(ExperimentalFoundationApi::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun AddBookScreen(
+fun EditBookScreen(
     navController: NavController,
     viewModel: BookViewModel
 ) {
     val state by viewModel.state.collectAsState()
-    val coroutineScope = rememberCoroutineScope()
+    viewModel.logAllStates()
+    BackHandler {
+        viewModel.resetInputState()
+        navController.popBackStack()
+    }
     Scaffold(
         containerColor = Color.Transparent,
         modifier = Modifier
@@ -107,18 +116,24 @@ fun AddBookScreen(
             initialPage = 1,
         ) { 3 }
         LaunchedEffect(pagerState.currentPage) {
-            delay(200)
-            Log.d("pager state", "Pager state: ${pagerState.currentPage}")
-            viewModel.resetInputState()
-            viewModel.updateTransactionType(pagerState.currentPage)
+            if (!state.isEdit) {
+                delay(200)
+                Log.d("pager state", "Pager state: ${pagerState.currentPage}")
+                if(!state.isEdit) {
+                    viewModel.resetInputState()
+                }
+                viewModel.updateTransactionType(pagerState.currentPage)
+            }
         }
         val animationSpec: AnimationSpec<Float> = tween(durationMillis = 250, easing = FastOutSlowInEasing)
         LaunchedEffect(state.transactionType) {
-            Log.d("transaction type", "Transaction type: ${state.transactionType}")
-            pagerState.animateScrollToPage(
-                page = state.transactionType,
-                animationSpec = animationSpec
-            )
+            if (!state.isEdit) {
+                Log.d("transaction type", "Transaction type: ${state.transactionType}")
+                pagerState.animateScrollToPage(
+                    page = state.transactionType,
+                    animationSpec = animationSpec
+                )
+            }
         }
         Column {
             Box(
@@ -127,40 +142,83 @@ fun AddBookScreen(
                     .padding(top = 60.dp)
                     .fillMaxWidth()
             ) {
-                SelectionBar(
-                    selectedTabPosition = state.transactionType,
-                    indicatorColor = Accent,
-                    fixedSize = true,
-                    modifier = Modifier
-                        .scale(0.95f)
-                ) {
-                    for (type in enumValues<TransactionType>()) {
-                        TabTitle(
-                            title = type.transactionName,
-                            icon = type.icon,
-                            position = type.value,
-                            textColor = Color.Black,
-                            modifier = Modifier
-                                .height(50.dp)
-                                .scale(0.95f)
-                        ) {
-                            viewModel.updateTransactionType(type.value)
-//                            Log.d("tab position value","Position: $it")
-//                            Log.d("tab type value","Type value: $type.value")
+                if (state.isEdit) {
+                    EditTransactionComposable(
+                        viewModel = viewModel,
+                        modifier = Modifier
+                    )
+                } else {
+                    SelectionBar(
+                        selectedTabPosition = state.transactionType,
+                        indicatorColor = Accent,
+                        fixedSize = true,
+                        modifier = Modifier
+                            .scale(0.95f)
+                    ) {
+                        for (type in enumValues<TransactionType>()) {
+                            TabTitle(
+                                title = type.transactionName,
+                                icon = type.icon,
+                                position = type.value,
+                                textColor = Color.Black,
+                                modifier = Modifier
+                                    .height(50.dp)
+                                    .scale(0.95f)
+                            ) {
+                                viewModel.updateTransactionType(type.value)
+                            }
                         }
                     }
                 }
             }
-            HorizontalPager(
-                state = pagerState,
-                beyondBoundsPageCount = 2
-            ) {
-                when (it) {
+            if (state.isEdit) {
+                when (state.transactionType) {
                     0 -> TransactionCard(viewModel = viewModel, transactionType = TransactionType.INCOME, navController = navController)
                     1 -> TransactionCard(viewModel = viewModel, transactionType = TransactionType.OUTCOME, navController = navController)
                     2 -> TransferCard(viewModel = viewModel, transactionType = TransactionType.TRANSFER, navController = navController)
                 }
+            } else {
+                HorizontalPager(
+                    state = pagerState,
+                    beyondBoundsPageCount = 2
+                ) {
+                    when (it) {
+                        0 -> TransactionCard(viewModel = viewModel, transactionType = TransactionType.INCOME, navController = navController)
+                        1 -> TransactionCard(viewModel = viewModel, transactionType = TransactionType.OUTCOME, navController = navController)
+                        2 -> TransferCard(viewModel = viewModel, transactionType = TransactionType.TRANSFER, navController = navController)
+                    }
+                }
             }
+        }
+    }
+}
+
+@Composable
+fun EditTransactionComposable(
+    viewModel: BookViewModel,
+    modifier: Modifier = Modifier
+) {
+    val state by viewModel.state.collectAsState()
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White
+        ),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 10.dp)
+            .height(55.dp)
+            .clip(shape = RoundedCornerShape(30.dp))
+    ) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .fillMaxSize()
+        ) {
+            Text(
+                text = if(state.isEdit) "Ubah / Hapus Transaksi" else "Tambah Dompet",
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.titleMedium,
+            )
         }
     }
 }
@@ -175,6 +233,7 @@ fun TransactionCard(
     val state by viewModel.state.collectAsState()
     val note = state.note
     val nominal = state.nominal
+    val context = LocalContext.current
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -201,6 +260,7 @@ fun TransactionCard(
                     includeFontPadding = false
                 )
             ),
+            singleLine = true,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(55.dp)
@@ -224,6 +284,8 @@ fun TransactionCard(
                     includeFontPadding = false
                 )
             ),
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
             modifier = Modifier
                 .fillMaxWidth()
                 .height(55.dp)
@@ -254,32 +316,33 @@ fun TransactionCard(
             modifier = Modifier
                 .weight(1f)
         )
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceAround,
+        ButtonCombinations(
+            backButton = {
+                viewModel.resetInputState()
+                navController.popBackStack()
+            },
+            addButton = {
+                if(viewModel.upsertTransaction(context) == null) {
+                    viewModel.resetInputState()
+                    navController.popBackStack()
+                }
+            },
+            saveButton = {
+                if(viewModel.upsertTransaction(context) == null) {
+                    viewModel.resetInputState()
+                    navController.popBackStack()
+                }
+            },
+            deleteButton = {
+                if(viewModel.deleteTransaction(context, state.currentTransactionId) == null) {
+                    viewModel.resetInputState()
+                    navController.popBackStack()
+                }
+            },
+            isEdit = state.isEdit,
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 20.dp)
-        ) {
-            AccentedButton(
-                onClick = {
-                    navController.navigate("book_main") {
-                        popUpTo("book_main") {
-                            inclusive = true
-                        }
-                    }
-                },
-                text = "Kembali",
-                modifier = Modifier
-                    .size(160.dp, 50.dp)
-            )
-            AccentedButton(
-                onClick = { /*TODO*/ },
-                text = "Tambah",
-                modifier = Modifier
-                    .size(160.dp, 50.dp)
-            )
-        }
+                .padding(top = 10.dp)
+        )
     }
 }
 
@@ -294,6 +357,7 @@ fun TransferCard(
     val note = state.note
     val nominal = state.nominal
     val admin = state.admin
+    val context = LocalContext.current
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -320,6 +384,7 @@ fun TransferCard(
                     includeFontPadding = false
                 )
             ),
+            singleLine = true,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(55.dp)
@@ -343,6 +408,8 @@ fun TransferCard(
                     includeFontPadding = false
                 )
             ),
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
             modifier = Modifier
                 .fillMaxWidth()
                 .height(55.dp)
@@ -375,38 +442,41 @@ fun TransferCard(
                     includeFontPadding = false
                 )
             ),
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
             modifier = Modifier
                 .fillMaxWidth()
                 .height(55.dp)
                 .padding(bottom = 5.dp)
         )
         Spacer(modifier = Modifier.weight(1f))
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceAround,
+        ButtonCombinations(
+            backButton = {
+                viewModel.resetInputState()
+                navController.popBackStack()
+            },
+            addButton = {
+                if(viewModel.upsertTransaction(context) == null) {
+                    viewModel.resetInputState()
+                    navController.popBackStack()
+                }
+            },
+            saveButton = {
+                if(viewModel.upsertTransaction(context) == null) {
+                    viewModel.resetInputState()
+                    navController.popBackStack()
+                }
+            },
+            deleteButton = {
+                if(viewModel.deleteTransaction(context, state.currentTransactionId) == null) {
+                    viewModel.resetInputState()
+                    navController.popBackStack()
+                }
+            },
+            isEdit = state.isEdit,
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 20.dp)
-        ) {
-            AccentedButton(
-                onClick = {
-                    navController.navigate("book_main") {
-                        popUpTo("book_main") {
-                            inclusive = true
-                        }
-                    }
-                },
-                text = "Kembali",
-                modifier = Modifier
-                    .size(160.dp, 50.dp)
-            )
-            AccentedButton(
-                onClick = { /*TODO*/ },
-                text = "Tambah",
-                modifier = Modifier
-                    .size(160.dp, 50.dp)
-            )
-        }
+                .padding(top = 10.dp)
+        )
     }
 }
 
@@ -449,6 +519,7 @@ fun DatePickerComposable(
                     }
                 }
             },
+        singleLine = true,
         modifier = Modifier
             .fillMaxWidth()
             .height(55.dp)
@@ -466,11 +537,11 @@ fun DatePickerComposable(
                         containerColor = Color.Transparent
                     ),
                     onClick = {
-                    val selectedDate = datePickerState.selectedDateMillis ?: System.currentTimeMillis()
-                    val selectedDateInLocalDate = Instant.ofEpochMilli(selectedDate).atZone(ZoneId.systemDefault()).toLocalDate()
-                    viewModel.updatePickedDateState(selectedDateInLocalDate)
-                    viewModel.updateFormattedDate(selectedDateInLocalDate)
-                    onDismiss()
+                        val selectedDate = datePickerState.selectedDateMillis ?: System.currentTimeMillis()
+                        val selectedDateInLocalDate = Instant.ofEpochMilli(selectedDate).atZone(ZoneId.systemDefault()).toLocalDate()
+                        viewModel.updatePickedDateState(selectedDateInLocalDate)
+                        viewModel.updateFormattedDate(selectedDateInLocalDate)
+                        onDismiss()
                     }
                 ) {
                     Text(text = "OK", color = Accent)
@@ -509,43 +580,6 @@ fun TransferWalletComposable(
     viewModel: BookViewModel,
 ) {
     val state by viewModel.state.collectAsState()
-    val walletList = listOf<TransferWallet>(
-        TransferWallet(
-            icon = R.drawable.bca,
-            name = "BCA",
-            nominal = "Rp 1,000,000.00"
-        ),
-        TransferWallet(
-            icon = R.drawable.dana,
-            name = "Dana",
-            nominal = "Rp 3,000,000.00"
-        ),
-        TransferWallet(
-            icon = R.drawable.gopay,
-            name = "Gopay",
-            nominal = "Rp 500,000.00"
-        ),
-        TransferWallet(
-            icon = R.drawable.ic_wallet,
-            name = "Dompet",
-            nominal = "Rp 1,000,000.00"
-        ),
-        TransferWallet(
-            icon = R.drawable.ic_wallet,
-            name = "Dompet",
-            nominal = "Rp 1,000,000.00"
-        ),
-        TransferWallet(
-            icon = R.drawable.ic_wallet,
-            name = "Dompet",
-            nominal = "Rp 1,000,000.00"
-        ),
-        TransferWallet(
-            icon = R.drawable.ic_wallet,
-            name = "Dompet",
-            nominal = "Rp 1,000,000.00"
-        ),
-    )
     Row(
         verticalAlignment = Alignment.Bottom,
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -567,12 +601,13 @@ fun TransferWalletComposable(
             TransferWalletDropDown(
                 wallet = state.walletSource,
                 isExpanded = state.isWalletSourceExpanded,
-                walletList = walletList,
+                walletList = state.walletList,
                 onExpandedChange = {
                     viewModel.updateWalletSourceExpanded(it)
                 },
                 onWalletSelected = {
                     viewModel.updateWalletSource(it)
+                    viewModel.updateWalletSourceId(it.id)
                 },
             )
         }
@@ -597,12 +632,13 @@ fun TransferWalletComposable(
             TransferWalletDropDown(
                 wallet = state.walletDestination,
                 isExpanded = state.isWalletDestinationExpanded,
-                walletList = walletList,
+                walletList = state.walletList,
                 onExpandedChange = {
                     viewModel.updateWalletDestinationExpanded(it)
                 },
                 onWalletSelected = {
                     viewModel.updateWalletDestination(it)
+                    viewModel.updateWalletDestinationId(it.id)
                 },
             )
         }
@@ -612,13 +648,14 @@ fun TransferWalletComposable(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TransferWalletDropDown(
-    wallet: TransferWallet?,
+    wallet: Wallet?,
     isExpanded: Boolean,
     modifier: Modifier = Modifier,
-    walletList: List<TransferWallet> = listOf(),
+    walletList: List<Wallet> = listOf(),
     onExpandedChange: (Boolean) -> Unit,
-    onWalletSelected: (TransferWallet) -> Unit
+    onWalletSelected: (Wallet) -> Unit
 ) {
+    val formatter = indonesianFormatter()
     ExposedDropdownMenuBox(
         expanded = isExpanded,
         onExpandedChange = {
@@ -676,7 +713,7 @@ fun TransferWalletDropDown(
                                 .fillMaxWidth()
                         )
                         Text(
-                            text = wallet.nominal,
+                            text = formatter.format(wallet.balance),
                             style = MaterialTheme.typography.bodySmall,
                             textAlign = TextAlign.Start,
                             modifier = Modifier
@@ -729,10 +766,11 @@ fun TransferWalletDropDown(
 
 @Composable
 fun TransferWalletDropDownItem(
-    wallet: TransferWallet,
+    wallet: Wallet,
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
+    val formatter = indonesianFormatter()
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
@@ -763,7 +801,7 @@ fun TransferWalletDropDownItem(
                     .fillMaxWidth()
             )
             Text(
-                text = wallet.nominal,
+                text = formatter.format(wallet.balance),
                 style = MaterialTheme.typography.bodySmall,
                 textAlign = TextAlign.Start,
                 modifier = Modifier
@@ -780,6 +818,7 @@ fun WalletDropDown(
     transactionType: TransactionType
 ) {
     val state by viewModel.state.collectAsState()
+    val formatter = indonesianFormatter()
     ExposedDropdownMenuBox(
         expanded = state.isWalletExpanded && state.transactionType == transactionType.value,
         onExpandedChange = {
@@ -789,7 +828,7 @@ fun WalletDropDown(
             .fillMaxWidth()
     ) {
         OutlinedTextField(
-            value = state.wallet,
+            value = state.walletSource?.name?: "",
             onValueChange = {},
             shape = RoundedCornerShape(30.dp),
             colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(
@@ -809,6 +848,7 @@ fun WalletDropDown(
                 )
             },
             readOnly = true,
+            singleLine = true,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(55.dp)
@@ -841,55 +881,17 @@ fun WalletDropDown(
                         shape = RoundedCornerShape(24.dp)
                     )
             ) {
-//                DropdownMenuItem(text = {}, onClick = {}, modifier = Modifier.height(55.dp))
-                WalletDropDownItem(
-                    viewModel = viewModel,
-                    icon = R.drawable.bca,
-                    walletName = "BCA",
-                    money = "Rp 1,000,000.00"
-                )
-                WalletDropDownItem(
-                    viewModel = viewModel,
-                    icon = R.drawable.dana,
-                    walletName = "Dana",
-                    money = "Rp 3,000,000.00"
-                )
-                WalletDropDownItem(
-                    viewModel = viewModel,
-                    icon = R.drawable.gopay,
-                    walletName = "Gopay",
-                    money = "Rp 500,000.00"
-                )
-                WalletDropDownItem(
-                    viewModel = viewModel,
-                    icon = R.drawable.ic_wallet,
-                    walletName = "Dompet",
-                    money = "Rp 1,000,000.00"
-                )
-                WalletDropDownItem(
-                    viewModel = viewModel,
-                    icon = R.drawable.ic_wallet,
-                    walletName = "Dompet",
-                    money = "Rp 1,000,000.00"
-                )
-                WalletDropDownItem(
-                    viewModel = viewModel,
-                    icon = R.drawable.ic_wallet,
-                    walletName = "Dompet",
-                    money = "Rp 1,000,000.00"
-                )
-                WalletDropDownItem(
-                    viewModel = viewModel,
-                    icon = R.drawable.ic_wallet,
-                    walletName = "Dompet",
-                    money = "Rp 1,000,000.00"
-                )
-                WalletDropDownItem(
-                    viewModel = viewModel,
-                    icon = R.drawable.ic_wallet,
-                    walletName = "Dompet",
-                    money = "Rp 1,000,000.00"
-                )
+                state.walletList.forEach { wallet ->
+                    WalletDropDownItem(
+                        icon = wallet.icon,
+                        walletName = wallet.name,
+                        money = formatter.format(wallet.balance)
+                    ) {
+                        viewModel.updateWalletSource(wallet)
+                        viewModel.updateWalletSourceId(wallet.id)
+                        viewModel.updateWalletExpanded(false)
+                    }
+                }
             }
         }
     }
@@ -897,10 +899,10 @@ fun WalletDropDown(
 
 @Composable
 fun WalletDropDownItem(
-    viewModel: BookViewModel,
     icon: Int,
     walletName: String,
-    money: String
+    money: String,
+    onClick: () -> Unit
 ) {
     DropdownMenuItem(
         leadingIcon = {
@@ -929,8 +931,7 @@ fun WalletDropDownItem(
             }
         },
         onClick = {
-            viewModel.updateWalletState(walletName)
-            viewModel.updateWalletExpanded(false)
+            onClick()
         },
         modifier = Modifier
             .fillMaxWidth()
@@ -943,9 +944,12 @@ fun CategoryGrid(
     modifier: Modifier = Modifier
 ) {
     val state by viewModel.state.collectAsState()
+    val categoryList = state.categoryList
     LazyVerticalGrid(
         columns = GridCells.Fixed(4),
+        contentPadding = PaddingValues(vertical = 20.dp),
         modifier = modifier
+            .fillMaxWidth()
             .border(
                 width = 1.dp,
                 color = Color.Black,
@@ -953,20 +957,17 @@ fun CategoryGrid(
             )
             .padding(horizontal = 20.dp)
     ) {
-        items(4) {
-            Spacer(modifier = Modifier.size(20.dp))
-        }
-        items(20) {
-            CategoryItem(
-                icon = R.drawable.ic_paper_checkmark,
-                text = "Makanan & Minuman",
-                isSelected = it == state.selectedCategory
-            ) {
-                viewModel.updateSelectedCategory(it)
+        categoryList.forEachIndexed { index, category ->
+            item {
+                CategoryItem(
+                    icon = category.icon,
+                    text = category.name,
+                    isSelected = index == state.selectedCategory
+                ) {
+                    viewModel.updateSelectedCategory(index)
+                    viewModel.updateSelectedCategoryId(category.id)
+                }
             }
-        }
-        items(4) {
-            Spacer(modifier = Modifier.size(20.dp))
         }
     }
 }

@@ -24,12 +24,11 @@ import com.bleh.monify.core.helper.MockData
 import com.bleh.monify.feature_analysis.analysis.AnalysisViewModel
 import com.bleh.monify.feature_analysis.analysis.AnalysisScreen
 import com.bleh.monify.feature_auth.AuthViewModel
-import com.bleh.monify.feature_auth.GoogleAuthClient
 import com.bleh.monify.feature_auth.login.LoginScreen
 import com.bleh.monify.feature_auth.register.RegisterScreen
 import com.bleh.monify.feature_book.BookViewModel
 import com.bleh.monify.feature_book.book.BookScreen
-import com.bleh.monify.feature_book.add.AddBookScreen
+import com.bleh.monify.feature_book.edit.EditBookScreen
 import com.bleh.monify.feature_more.budget.BudgetViewModel
 import com.bleh.monify.feature_more.budget.BudgetScreen
 import com.bleh.monify.feature_more.category.EditCategoryScreen
@@ -47,8 +46,6 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    @Inject
-    lateinit var authUiClient: GoogleAuthClient
     @Inject
     lateinit var appDatabase: AppDatabase
     @Inject
@@ -98,7 +95,7 @@ class MainActivity : ComponentActivity() {
                         }
                         composable("book_add") {
                             val viewModel = it.sharedViewModel<BookViewModel>(navController)
-                            AddBookScreen(navController = navController, viewModel = viewModel)
+                            EditBookScreen(navController = navController, viewModel = viewModel)
                         }
                     }
                     navigation(startDestination = "wallet_main", route = "wallet") {

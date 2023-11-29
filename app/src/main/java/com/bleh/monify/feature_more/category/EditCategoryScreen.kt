@@ -10,8 +10,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -44,12 +42,9 @@ import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.bleh.monify.R
 import com.bleh.monify.core.enums.CategoryType
-import com.bleh.monify.core.ui_components.AccentedButton
 import com.bleh.monify.core.ui_components.ButtonCombinations
-import com.bleh.monify.feature_book.add.CategoryItem
 import com.bleh.monify.feature_more.category.helper.categoryIconList
 import com.bleh.monify.ui.theme.Grey
 

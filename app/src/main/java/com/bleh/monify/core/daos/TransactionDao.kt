@@ -7,6 +7,7 @@ import androidx.room.Upsert
 import com.bleh.monify.core.entities.Transaction
 import com.bleh.monify.core.pojos.TransactionCategoryWallet
 import kotlinx.coroutines.flow.Flow
+import java.time.LocalDate
 
 @Dao
 interface TransactionDao {
@@ -14,8 +15,8 @@ interface TransactionDao {
     @Upsert
     suspend fun upsertTransaction(transaction: Transaction)
 
-    @Delete
-    suspend fun deleteTransaction(transaction: Transaction)
+    @Query("delete from 'transaction' where id = :id")
+    suspend fun deleteTransaction(id: Int)
 
     @Query("SELECT * FROM 'transaction'")
     fun getTransactions(): Flow<List<Transaction>>
@@ -27,9 +28,17 @@ interface TransactionDao {
 //            "FROM category" +
 //        ") ON transaction.categoryId = category.id" +
 //    )
+    @androidx.room.Transaction
     @Query("SELECT * FROM 'transaction'")
     fun getTransactionCategoryWallets(): Flow<List<TransactionCategoryWallet>>
 
+    @androidx.room.Transaction
     @Query("SELECT * FROM 'transaction' WHERE description LIKE '%' || :str || '%'")
     fun getTransactionCategoryWalletsByString(str: String): Flow<List<TransactionCategoryWallet>>
+
+    @Query("SELECT SUM(balance) AS sum FROM 'transaction' WHERE date BETWEEN :startDate AND :endDate AND balance > 0")
+    fun sumOfPositiveInRange(startDate: LocalDate, endDate: LocalDate): Flow<Double>
+
+    @Query("SELECT SUM(balance) AS sum FROM 'transaction' WHERE date BETWEEN :startDate AND :endDate AND balance < 0")
+    fun sumOfNegativeInRange(startDate: LocalDate, endDate: LocalDate): Flow<Double>
 }
