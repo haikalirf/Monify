@@ -51,7 +51,7 @@ class MockData @Inject constructor(
             categoryId = faker.random.nextInt(min = 1, max = 13),
             isTransfer = false,
             description = faker.random.randomString(min = 5, max = 20),
-            balance = faker.random.nextInt(min = 10000, max = 10000000) + faker.random.nextDouble(),
+            balance = faker.random.nextInt(min = -10000000, max = 10000000) + faker.random.nextDouble(),
             admin = null,
             date = LocalDate.now().minus(
                 faker.random.nextInt(min = 0, max = 5).toLong(),
@@ -67,8 +67,8 @@ class MockData @Inject constructor(
             categoryId = faker.random.nextInt(min = 1, max = 13),
             isTransfer = true,
             description = faker.random.randomString(min = 5, max = 20),
-            balance = faker.random.nextInt(min = 10000, max = 10000000) + faker.random.nextDouble(),
-            admin = faker.random.nextInt(min = 1000, max = 10000) + faker.random.nextDouble(),
+            balance = faker.random.nextInt(min = -10000000, max = 10000000) + faker.random.nextDouble(),
+            admin = faker.random.nextInt(min = -10000, max = -1000) + faker.random.nextDouble(),
             date = LocalDate.now().minus(
                 faker.random.nextInt(min = 0, max = 5).toLong(),
                 ChronoUnit.DAYS

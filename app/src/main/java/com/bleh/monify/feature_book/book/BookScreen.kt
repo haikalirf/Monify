@@ -50,12 +50,18 @@ import androidx.navigation.NavController
 import com.bleh.monify.R
 import com.bleh.monify.core.entities.Transaction
 import com.bleh.monify.core.entities.groupedByDay
+import com.bleh.monify.core.helper.indonesianFormatter
+import com.bleh.monify.core.pojos.TransactionCategoryWallet
+import com.bleh.monify.core.pojos.groupedByDay
 import com.bleh.monify.core.ui_components.BottomBar
 import com.bleh.monify.core.ui_components.FloatingAddButton
 import com.bleh.monify.feature_book.BookViewModel
 import com.bleh.monify.ui.theme.AccentLight
 import com.bleh.monify.ui.theme.Green
 import com.bleh.monify.ui.theme.Red
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @Composable
 fun BookScreen(
@@ -195,11 +201,12 @@ fun BookList(
             modifier = Modifier
                 .weight(1f)
         ) {
-            state.transactionList.groupedByDay().forEach { (date, transactions) ->
+            state.transactionList.groupedByDay().forEach { (date, transactionList) ->
                 item {
                     BookListPerDay(
                         viewModel = viewModel,
-                        transactionList = transactions,
+                        date = date,
+                        transactionList = transactionList,
                         modifier = Modifier
                             .fillMaxWidth()
                     )
@@ -212,11 +219,25 @@ fun BookList(
 @Composable
 fun BookListPerDay(
     viewModel: BookViewModel,
-    transactionList: List<Transaction>,
+    date: LocalDate,
+    transactionList: List<TransactionCategoryWallet>,
     modifier: Modifier = Modifier
 ) {
     var showList by remember {
         mutableStateOf(true)
+    }
+    val formatter = indonesianFormatter()
+    val localDateFormatter = DateTimeFormatter.ofPattern("dd-MM EEE").withLocale(Locale("id", "ID"))
+    //get both positive sum and negative sum
+    val positiveSum = transactionList.filter { transactionCategoryWallet ->
+        transactionCategoryWallet.transaction.balance >= 0
+    }.sumOf { transactionCategoryWallet ->
+        transactionCategoryWallet.transaction.balance
+    }
+    val negativeSum = transactionList.filter { transactionCategoryWallet ->
+        transactionCategoryWallet.transaction.balance < 0
+    }.sumOf { transactionCategoryWallet ->
+        transactionCategoryWallet.transaction.balance
     }
     Column(
         modifier = modifier
@@ -239,21 +260,21 @@ fun BookListPerDay(
                 }
         ) {
             Text(
-                text = "11-01 Rabu",
+                text = localDateFormatter.format(date),
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier
                     .padding(start = 20.dp)
                     .weight(1f)
             )
             Text(
-                text = "+Rp 3,000,000.00",
+                text = formatter.format(positiveSum),
                 style = MaterialTheme.typography.bodyMedium,
                 color = Green,
                 modifier = Modifier
                     .padding(end = 10.dp)
             )
             Text(
-                text = "-Rp 100,000.00",
+                text = formatter.format(negativeSum),
                 style = MaterialTheme.typography.bodyMedium,
                 color = Red,
                 modifier = Modifier
@@ -264,17 +285,17 @@ fun BookListPerDay(
             visible = showList
         ) {
             Column {
-                transactionList.forEach { transaction ->
+                transactionList.forEach { transactionCategoryWallet ->
                     BookListItem(
                         viewModel = viewModel,
-                        icon = R.drawable.ic_wallet,
-                        title = transaction.description,
-                        note = transaction.description,
-                        amount = transaction.balance.toString(),
-                        amountColor = if (transaction.balance > 0) Green else Red,
-                        wallet = "Wallet",
+                        icon = transactionCategoryWallet.category.icon,
+                        title = transactionCategoryWallet.category.name,
+                        note = transactionCategoryWallet.transaction.description,
+                        amount = formatter.format(transactionCategoryWallet.transaction.balance),
+                        amountColor = if (transactionCategoryWallet.transaction.balance >= 0) Green else Red,
+                        wallet = transactionCategoryWallet.walletFrom.name,
                         modifier = Modifier
-                            .padding(horizontal = 10.dp)
+                            .fillMaxWidth()
                     )
                 }
             }
@@ -293,6 +314,7 @@ fun BookListItem(
     wallet: String,
     modifier: Modifier = Modifier,
 ) {
+    val formatter = indonesianFormatter()
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
