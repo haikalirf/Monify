@@ -11,7 +11,7 @@ import com.bleh.monify.core.daos.UserDao
 import com.bleh.monify.core.daos.WalletDao
 import com.bleh.monify.core.entities.Budget
 import com.bleh.monify.core.entities.Category
-import com.bleh.monify.core.entities.Transaction
+import com.bleh.monify.core.entities.TransactionEntity
 import com.bleh.monify.core.entities.User
 import com.bleh.monify.core.entities.Wallet
 
@@ -20,7 +20,7 @@ import com.bleh.monify.core.entities.Wallet
         User::class,
         Category::class,
         Wallet::class,
-        Transaction::class,
+        TransactionEntity::class,
         Budget::class,
     ],
     version = 1,

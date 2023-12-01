@@ -44,7 +44,7 @@ import java.time.LocalDate
         Index(value = ["categoryId"])
     ]
 )
-data class Transaction(
+data class TransactionEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
     val userId: String,

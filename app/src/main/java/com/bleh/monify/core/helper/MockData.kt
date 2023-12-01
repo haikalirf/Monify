@@ -5,7 +5,7 @@ import com.bleh.monify.core.daos.TransactionDao
 import com.bleh.monify.core.daos.UserDao
 import com.bleh.monify.core.daos.WalletDao
 import com.bleh.monify.core.entities.Category
-import com.bleh.monify.core.entities.Transaction
+import com.bleh.monify.core.entities.TransactionEntity
 import com.bleh.monify.core.entities.User
 import com.bleh.monify.core.entities.Wallet
 import com.bleh.monify.core.enums.CategoryType
@@ -35,24 +35,33 @@ class MockData @Inject constructor(
             isDeleted = false
         )
     }
-    private val categoryList = categoryIconList.map {
+//    private val categoryList = categoryIconList.map {
+//        Category(
+//            userId = "pijBlqHvlmWJkUO8LWckenhzob02",
+//            name = faker.random.randomString(min = 5, max = 15),
+//            type = faker.random.nextEnum<CategoryType>(),
+//            icon = it,
+//            isDeleted = false
+//        )
+//    }
+    private val categoryList = categoryIconList.mapIndexed { index, icon ->
         Category(
             userId = "pijBlqHvlmWJkUO8LWckenhzob02",
             name = faker.random.randomString(min = 5, max = 15),
-            type = faker.random.nextEnum<CategoryType>(),
-            icon = it,
+            type = if (index < 6) CategoryType.OUTCOME else CategoryType.INCOME,
+            icon = icon,
             isDeleted = false
         )
     }
     private val transactionList1 = List(15) {
-        Transaction(
+        TransactionEntity(
             userId = "pijBlqHvlmWJkUO8LWckenhzob02",
             walletFromId = faker.random.nextInt(min = 1, max = 3),
             walletToId = null,
-            categoryId = faker.random.nextInt(min = 1, max = 13),
+            categoryId = faker.random.nextInt(min = 7, max = 13),
             isTransfer = false,
             description = faker.random.randomString(min = 5, max = 15),
-            balance = faker.random.nextInt(min = -10000000, max = 10000000) + faker.random.nextDouble(),
+            balance = faker.random.nextInt(min = 1000, max = 10000000) + faker.random.nextDouble(),
             admin = null,
             date = LocalDate.now().minus(
                 faker.random.nextInt(min = 0, max = 5).toLong(),
@@ -61,7 +70,7 @@ class MockData @Inject constructor(
         )
     }
     private val transferList = List(10) {
-        Transaction(
+        TransactionEntity(
             userId = "pijBlqHvlmWJkUO8LWckenhzob02",
             walletFromId = faker.random.nextInt(min = 1, max = 3),
             walletToId = faker.random.nextInt(min = 1, max = 3),
@@ -77,14 +86,14 @@ class MockData @Inject constructor(
         )
     }
     private val transactionList2 = List(15) {
-        Transaction(
+        TransactionEntity(
             userId = "pijBlqHvlmWJkUO8LWckenhzob02",
             walletFromId = faker.random.nextInt(min = 1, max = 3),
             walletToId = null,
-            categoryId = faker.random.nextInt(min = 1, max = 13),
+            categoryId = faker.random.nextInt(min = 1, max = 6),
             isTransfer = false,
             description = faker.random.randomString(min = 5, max = 15),
-            balance = faker.random.nextInt(min = -10000000, max = 10000000) + faker.random.nextDouble(),
+            balance = faker.random.nextInt(min = -10000000, max = -1000) + faker.random.nextDouble(),
             admin = null,
             date = LocalDate.now().minus(
                 faker.random.nextInt(min = 0, max = 5).toLong(),

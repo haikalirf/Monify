@@ -19,7 +19,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.paint
@@ -27,6 +26,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.bleh.monify.R
 import com.bleh.monify.core.ui_components.BottomBar
@@ -37,10 +37,9 @@ import com.bleh.monify.feature_analysis.budget.AnalysisBudgetViewModel
 import com.bleh.monify.feature_analysis.comparison.AnalysisComparisonCard
 import com.bleh.monify.feature_analysis.comparison.AnalysisComparisonViewModel
 import com.bleh.monify.feature_analysis.transaction.AnalysisTransactionViewModel
-import com.bleh.monify.feature_analysis.transaction.TransactionAnalysisCard
+import com.bleh.monify.feature_analysis.transaction.AnalysisTransactionCard
 import com.bleh.monify.ui.theme.Accent
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -125,14 +124,14 @@ fun AnalysisScreen(
                     .fillMaxSize()
             ) {
                 when (it) {
-                    0 -> TransactionAnalysisCard(
-                        viewModel = AnalysisTransactionViewModel(),
+                    0 -> AnalysisTransactionCard(
+                        viewModel = hiltViewModel<AnalysisTransactionViewModel>(),
                         transactionType = AnalysisType.INCOME,
                         modifier = Modifier
                             .fillMaxWidth()
                     )
-                    1 -> TransactionAnalysisCard(
-                        viewModel = AnalysisTransactionViewModel(),
+                    1 -> AnalysisTransactionCard(
+                        viewModel = hiltViewModel<AnalysisTransactionViewModel>(),
                         transactionType = AnalysisType.OUTCOME,
                         modifier = Modifier
                             .fillMaxWidth()

@@ -9,7 +9,7 @@ import com.bleh.monify.core.daos.CategoryDao
 import com.bleh.monify.core.daos.TransactionDao
 import com.bleh.monify.core.daos.WalletDao
 import com.bleh.monify.core.entities.Category
-import com.bleh.monify.core.entities.Transaction
+import com.bleh.monify.core.entities.TransactionEntity
 import com.bleh.monify.core.entities.Wallet
 import com.bleh.monify.core.pojos.TransactionCategoryWallet
 import com.bleh.monify.feature_auth.GoogleAuthClient
@@ -17,7 +17,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -261,7 +260,7 @@ class BookViewModel @Inject constructor(
                 }
                 val balance = state.value.nominal.toDouble() * if (state.value.transactionType == 1) -1 else 1
                 transactionDao.upsertTransaction(
-                    Transaction(
+                    TransactionEntity(
                         id = state.value.currentTransactionId,
                         userId = currentUser!!.userId,
                         walletFromId = state.value.walletSourceId,

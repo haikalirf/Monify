@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -40,21 +41,32 @@ import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import com.bleh.monify.R
+import com.bleh.monify.core.enums.CategoryType
+import com.bleh.monify.core.helper.DistinctColors
+import com.bleh.monify.core.helper.indonesianFormatter
+import com.bleh.monify.core.pojos.CategoryWithSumAndPercentage
 import com.bleh.monify.feature_analysis.analysis.AnalysisType
 import com.bleh.monify.ui.theme.Green
-import com.bleh.monify.ui.theme.Pie1
-import com.bleh.monify.ui.theme.Pie2
 import com.bleh.monify.ui.theme.Red
 import kotlin.math.cos
 import kotlin.math.sin
 
 @Composable
-fun TransactionAnalysisCard(
+fun AnalysisTransactionCard(
     viewModel: AnalysisTransactionViewModel,
     transactionType: AnalysisType,
     modifier: Modifier = Modifier,
 ) {
     val state by viewModel.state.collectAsState()
+    val transactionList = if (transactionType == AnalysisType.INCOME) state.incomeList else state.outcomeList
+    val distinctColors = DistinctColors()
+    val chartDataList = transactionList.map {
+        ChartData(
+            color = distinctColors.next(),
+            data = it.percentage.toFloat(),
+            icon = painterResource(id = it.category.icon)
+        )
+    }
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top,
@@ -84,9 +96,9 @@ fun TransactionAnalysisCard(
             }
         }
         AnalysisPieChart(
-            viewModel = viewModel,
+            chartDataList = chartDataList,
+            sum = if(transactionType == AnalysisType.INCOME) state.incomeSum else state.outcomeSum,
             transactionType = transactionType,
-            transactionList = state.analysisTransactionList,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 30.dp)
@@ -94,9 +106,8 @@ fun TransactionAnalysisCard(
                 .padding(bottom = 20.dp)
         )
         AnalysisTransactionList(
-            viewModel = viewModel,
-            transactionType = transactionType,
-            transactionList = state.analysisTransactionList,
+            transactionType = if(transactionType == AnalysisType.INCOME) CategoryType.INCOME else CategoryType.OUTCOME,
+            categoryList = if(transactionType == AnalysisType.INCOME) state.incomeList else state.outcomeList,
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)
@@ -107,37 +118,21 @@ fun TransactionAnalysisCard(
 private val Float.degreeToAngle
     get() = (this * Math.PI / 180f).toFloat()
 
-
 data class ChartData(val color: Color, val data: Float, val icon: Painter)
-
-class ColorGenerator() {
-    private var currentColor = Color(0xFFFFBB00)
-
-    fun nextColor(): Color {
-        val color = currentColor
-        currentColor = Color(currentColor.value + 43520u)
-        return color
-    }
-}
-
 
 @Composable
 fun AnalysisPieChart(
-    viewModel: AnalysisTransactionViewModel,
     transactionType: AnalysisType,
-    transactionList: List<AnalysisTransaction>,
+    chartDataList: List<ChartData>,
+    sum: Double,
     modifier: Modifier = Modifier
 ) {
+    val formatter = indonesianFormatter()
     Box(
         modifier = modifier
             .fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        val colorGenerator = ColorGenerator()
-        val chartDataList = listOf(
-            ChartData(Pie1, 80f, painterResource(id = R.drawable.ic_person_blackboard)),
-            ChartData(Pie2, 20f, painterResource(id = R.drawable.ic_money)),
-        )
         val brushColor = if (transactionType == AnalysisType.INCOME) Green else Red
         val brushStyle = Brush.linearGradient(
             colors = listOf(brushColor, brushColor),
@@ -146,7 +141,7 @@ fun AnalysisPieChart(
         val textMeasurer = rememberTextMeasurer()
         val textLayoutResult: TextLayoutResult =
             textMeasurer.measure(
-                text = AnnotatedString(text = sign + "Rp 1,000,000.00"),
+                text = AnnotatedString(text = formatter.format(sum)),
                 style = MaterialTheme.typography.labelSmall,
             )
         val textSize = textLayoutResult.size
@@ -215,21 +210,20 @@ fun AnalysisPieChart(
 
 @Composable
 fun AnalysisTransactionList(
-    viewModel: AnalysisTransactionViewModel,
-    transactionType: AnalysisType,
-    transactionList: List<AnalysisTransaction>,
+    transactionType: CategoryType,
+    categoryList: List<CategoryWithSumAndPercentage>,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
+        contentPadding = PaddingValues(bottom = 85.dp),
         modifier = modifier
     ) {
-        transactionList.zip(listOf("80%", "20%")).forEach { (transaction, percentage) ->
+        categoryList.forEach { category ->
             item {
                 AnalysisTransactionListItem(
-                    viewModel = viewModel,
                     transactionType = transactionType,
-                    transaction = transaction,
-                    percentage = percentage
+                    category = category,
+                    modifier = Modifier
                 ) {
 
                 }
@@ -240,14 +234,12 @@ fun AnalysisTransactionList(
 
 @Composable
 fun AnalysisTransactionListItem(
-    viewModel: AnalysisTransactionViewModel,
-    transactionType: AnalysisType,
-    transaction: AnalysisTransaction,
-    percentage: String,
+    transactionType: CategoryType,
+    category: CategoryWithSumAndPercentage,
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
 ) {
-    val sign = if (transactionType == AnalysisType.INCOME) "+" else "-"
+    val formatter = indonesianFormatter()
     Column(
         modifier = modifier
     ) {
@@ -263,26 +255,26 @@ fun AnalysisTransactionListItem(
                 .padding(horizontal = 20.dp)
         ) {
             Icon(
-                painter = painterResource(id = transaction.icon),
+                painter = painterResource(id = category.category.icon),
                 contentDescription = "Category Icon"
             )
             Text(
-                text = transaction.name,
+                text = category.category.name,
                 style = MaterialTheme.typography.labelLarge,
                 modifier = Modifier
                     .padding(start = 20.dp)
             )
             Spacer(modifier = Modifier.weight(1f))
             Text(
-                text = percentage,
+                text = String.format("%.2f", category.percentage) + "%",
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier
                     .padding(end = 10.dp)
             )
             Text(
-                text = sign + transaction.amount,
+                text = formatter.format(category.sum),
                 style = MaterialTheme.typography.labelSmall,
-                color = if (transactionType == AnalysisType.INCOME) Green else Red
+                color = if (transactionType == CategoryType.INCOME) Green else Red
             )
         }
         Divider(
@@ -290,15 +282,4 @@ fun AnalysisTransactionListItem(
             color = Color.Black
         )
     }
-}
-
-//@Preview(showBackground = true)
-@Composable
-fun PreviewAnalysisTransactionCard() {
-    TransactionAnalysisCard(
-        viewModel = AnalysisTransactionViewModel(),
-        transactionType = AnalysisType.INCOME,
-        modifier = Modifier
-            .fillMaxSize()
-    )
 }

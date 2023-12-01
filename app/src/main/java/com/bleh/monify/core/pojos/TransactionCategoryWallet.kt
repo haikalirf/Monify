@@ -1,15 +1,14 @@
 package com.bleh.monify.core.pojos
 
-import androidx.room.ColumnInfo
 import androidx.room.Embedded
 import androidx.room.Relation
 import com.bleh.monify.core.entities.Category
-import com.bleh.monify.core.entities.Transaction
+import com.bleh.monify.core.entities.TransactionEntity
 import com.bleh.monify.core.entities.Wallet
 import java.time.LocalDate
 
 data class TransactionCategoryWallet(
-    @Embedded val transaction: Transaction,
+    @Embedded val transaction: TransactionEntity,
     @Relation(
         parentColumn = "categoryId",
         entityColumn = "id"
@@ -25,11 +24,6 @@ data class TransactionCategoryWallet(
         entityColumn = "id"
     )
     val walletTo: Wallet?
-//    @ColumnInfo(name = "categoryName") val categoryName: String,
-//    @ColumnInfo(name = "icon") val categoryIcon: Int,
-//    @ColumnInfo(name = "walletName") val walletName: String,
-//    @Embedded val category: Category
-//    @Embedded val wallet: Wallet
 )
 
 fun List<TransactionCategoryWallet>.groupedByDay(): Map<LocalDate, List<TransactionCategoryWallet>> {

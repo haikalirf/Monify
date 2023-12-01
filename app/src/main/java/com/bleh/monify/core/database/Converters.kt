@@ -25,14 +25,4 @@ class Converters {
     fun categoryTypeToString(categoryType: CategoryType): String {
         return categoryType.name
     }
-
-//    @TypeConverter
-//    fun stringToBudgetType(string: String): BudgetType {
-//        return BudgetType.valueOf(string)
-//    }
-//
-//    @TypeConverter
-//    fun budgetTypeToString(budgetType: BudgetType): String {
-//        return budgetType.name
-//    }
 }
