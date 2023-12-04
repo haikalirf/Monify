@@ -141,7 +141,6 @@ fun LoginScreen(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginCard(
     modifier: Modifier = Modifier,
@@ -153,6 +152,7 @@ fun LoginCard(
     loginButtonClick: () -> Unit,
     signUpButtonClick: (Int) -> Unit
 ) {
+    var passwordVisible by rememberSaveable { mutableStateOf(false) }
     Card(
         shape = RoundedCornerShape(40.dp),
         border = BorderStroke(1.dp, Color.Black),
@@ -181,7 +181,6 @@ fun LoginCard(
                     .padding(horizontal = 30.dp)
                     .padding(top = 40.dp)
             )
-            var passwordVisible by rememberSaveable { mutableStateOf(false) }
             OutlinedTextField(
                 value = passwordState,
                 onValueChange = onPasswordChange,

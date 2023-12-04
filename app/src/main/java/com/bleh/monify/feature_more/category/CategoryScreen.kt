@@ -61,7 +61,6 @@ fun CategoryScreen(
     viewModel: CategoryViewModel
 ) {
     val state by viewModel.state.collectAsState()
-    val coroutineScope = rememberCoroutineScope()
     Scaffold(
         containerColor = Color.Transparent,
         modifier = Modifier
