@@ -35,15 +35,6 @@ class MockData @Inject constructor(
             isDeleted = false
         )
     }
-//    private val categoryList = categoryIconList.map {
-//        Category(
-//            userId = "pijBlqHvlmWJkUO8LWckenhzob02",
-//            name = faker.random.randomString(min = 5, max = 15),
-//            type = faker.random.nextEnum<CategoryType>(),
-//            icon = it,
-//            isDeleted = false
-//        )
-//    }
     private val categoryList = categoryIconList.mapIndexed { index, icon ->
         Category(
             userId = "pijBlqHvlmWJkUO8LWckenhzob02",

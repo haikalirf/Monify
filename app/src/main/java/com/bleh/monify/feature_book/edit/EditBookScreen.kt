@@ -99,7 +99,7 @@ fun EditBookScreen(
     viewModel: BookViewModel
 ) {
     val state by viewModel.state.collectAsState()
-    viewModel.logAllStates()
+//    viewModel.logAllStates()
     BackHandler {
         viewModel.resetInputState()
         navController.popBackStack()
@@ -116,17 +116,17 @@ fun EditBookScreen(
             initialPage = 1,
         ) { 3 }
         LaunchedEffect(pagerState.currentPage) {
+            Log.d("pager state", "isEdit: ${state.isEdit}")
             if (!state.isEdit) {
                 delay(200)
                 Log.d("pager state", "Pager state: ${pagerState.currentPage}")
-                if(!state.isEdit) {
-                    viewModel.resetInputState()
-                }
+                viewModel.resetInputState()
                 viewModel.updateTransactionType(pagerState.currentPage)
             }
         }
         val animationSpec: AnimationSpec<Float> = tween(durationMillis = 250, easing = FastOutSlowInEasing)
         LaunchedEffect(state.transactionType) {
+            Log.d("pager state", "isEdit: ${state.isEdit}")
             if (!state.isEdit) {
                 Log.d("transaction type", "Transaction type: ${state.transactionType}")
                 pagerState.animateScrollToPage(
@@ -322,20 +322,23 @@ fun TransactionCard(
                 navController.popBackStack()
             },
             addButton = {
-                if(viewModel.upsertTransaction(context) == null) {
-                    viewModel.resetInputState()
+                val err = viewModel.upsertTransaction(context)
+                if(err == null) {
+//                    viewModel.resetInputState()
                     navController.popBackStack()
                 }
             },
             saveButton = {
-                if(viewModel.upsertTransaction(context) == null) {
-                    viewModel.resetInputState()
+                val err = viewModel.upsertTransaction(context)
+                if(err == null) {
+//                    viewModel.resetInputState()
                     navController.popBackStack()
                 }
             },
             deleteButton = {
-                if(viewModel.deleteTransaction(context, state.currentTransactionId) == null) {
-                    viewModel.resetInputState()
+                val err = viewModel.deleteTransaction(context, state.currentTransactionId)
+                if(err == null) {
+//                    viewModel.resetInputState()
                     navController.popBackStack()
                 }
             },
@@ -456,20 +459,23 @@ fun TransferCard(
                 navController.popBackStack()
             },
             addButton = {
-                if(viewModel.upsertTransaction(context) == null) {
-                    viewModel.resetInputState()
+                val err = viewModel.upsertTransaction(context)
+                if(err == null) {
+//                    viewModel.resetInputState()
                     navController.popBackStack()
                 }
             },
             saveButton = {
-                if(viewModel.upsertTransaction(context) == null) {
-                    viewModel.resetInputState()
+                val err = viewModel.upsertTransaction(context)
+                if(err == null) {
+//                    viewModel.resetInputState()
                     navController.popBackStack()
                 }
             },
             deleteButton = {
-                if(viewModel.deleteTransaction(context, state.currentTransactionId) == null) {
-                    viewModel.resetInputState()
+                val err = viewModel.deleteTransaction(context, state.currentTransactionId)
+                if(err == null) {
+//                    viewModel.resetInputState()
                     navController.popBackStack()
                 }
             },
@@ -839,6 +845,16 @@ fun WalletDropDown(
                     includeFontPadding = false
                 )
             ),
+            leadingIcon = {
+                if (state.walletSource != null) {
+                    Image(
+                        painter = painterResource(id = state.walletSource?.icon!!),
+                        contentDescription = "wallet",
+                        modifier = Modifier
+                            .size(24.dp)
+                    )
+                }
+            },
             trailingIcon = {
                 Icon(
                     painter = painterResource(id = if (state.isWalletExpanded) R.drawable.ic_arrow_drop_up else R.drawable.ic_arrow_drop_down),

@@ -5,6 +5,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.bleh.monify.core.daos.BudgetDao
 import com.bleh.monify.core.daos.CategoryDao
 import com.bleh.monify.core.daos.TransactionDao
 import com.bleh.monify.core.daos.WalletDao
@@ -48,7 +49,8 @@ data class BookState(
     val isEdit: Boolean = false,
     val transactionList: List<TransactionCategoryWallet> = listOf(),
     val categoryList: List<Category> = listOf(),
-    val walletList: List<Wallet> = listOf()
+    val walletList: List<Wallet> = listOf(),
+    val oldNominal: Double = 0.0
 )
 
 @HiltViewModel
@@ -57,6 +59,7 @@ class BookViewModel @Inject constructor(
     private val transactionDao: TransactionDao,
     private val categoryDao: CategoryDao,
     private val walletDao: WalletDao,
+    private val budgetDao: BudgetDao
 ): ViewModel() {
     private val _state = MutableStateFlow(BookState())
     val state = _state.asStateFlow()
@@ -242,21 +245,21 @@ class BookViewModel @Inject constructor(
         }
     }
 
+    fun updateOldNominalState (nominal: Double) {
+        _state.update {
+            it.copy(oldNominal = nominal)
+        }
+    }
+
     fun upsertTransaction(context: Context): Exception? {
         var err: Exception? = null
         viewModelScope.launch {
             try {
-//                Log.d("BookViewModel", "upsertTransaction: ${currentUser!!.userId}")
-//                Log.d("BookViewModel", "upsertTransaction: ${state.value.walletSourceId}")
-//                Log.d("BookViewModel", "upsertTransaction: ${state.value.walletDestinationId}")
-//                Log.d("BookViewModel", "upsertTransaction: ${state.value.selectedCategoryId}")
-//                Log.d("BookViewModel", "upsertTransaction: ${state.value.transactionType == 2}")
-//                Log.d("BookViewModel", "upsertTransaction: ${state.value.note}")
-//                Log.d("BookViewModel", "upsertTransaction: ${state.value.nominal.toDouble()}")
-//                Log.d("BookViewModel", "upsertTransaction: ${state.value.admin.toDoubleOrNull()}")
-//                Log.d("BookViewModel", "upsertTransaction: ${state.value.pickedDate}")
                 if (state.value.transactionType != 2 && state.value.selectedCategoryId == null) {
-                    throw Exception("Category must be selected")
+                    throw Exception("Harus memilih kategori")
+                }
+                if (state.value.transactionType == 2 && state.value.admin.isEmpty()) {
+                    throw Exception("Harus memasukkan admin")
                 }
                 val balance = state.value.nominal.toDouble() * if (state.value.transactionType == 1) -1 else 1
                 transactionDao.upsertTransaction(
@@ -273,10 +276,38 @@ class BookViewModel @Inject constructor(
                         date = state.value.pickedDate
                     )
                 )
+                var value = balance
+                if (state.value.isEdit) {
+                    value = balance - state.value.oldNominal
+                }
+                if (state.value.transactionType == 2) {
+                    walletDao.addWalletBalance(state.value.walletSourceId, -value)
+                    walletDao.addWalletBalance(state.value.walletDestinationId!!, value)
+                    transactionDao.upsertTransaction(
+                        TransactionEntity(
+                            id = 0,
+                            userId = currentUser.userId,
+                            walletFromId = state.value.walletSourceId,
+                            walletToId = state.value.walletDestinationId,
+                            categoryId = null,
+                            isTransfer = false,
+                            description = "Admin",
+                            balance = -state.value.admin.toDouble(),
+                            admin = null,
+                            date = state.value.pickedDate
+                        )
+                    )
+                } else {
+                    walletDao.addWalletBalance(state.value.walletSourceId, value)
+                }
                 Toast.makeText(context, "Transaction Saved", Toast.LENGTH_SHORT).show()
             } catch (e: Exception) {
                 Log.d("BookViewModel", "upsertTransaction: $e")
-                Toast.makeText(context, "Unexpected Error", Toast.LENGTH_SHORT).show()
+                if (e.message == "Harus memilih kategori") {
+                    Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(context, "Unexpected Error", Toast.LENGTH_SHORT).show()
+                }
                 err = e
             }
         }
@@ -310,7 +341,6 @@ class BookViewModel @Inject constructor(
                 showDatePicker = false,
                 isWalletExpanded = false,
                 admin = "",
-                transactionType = 1,
                 selectedCategory = null,
                 selectedCategoryId = null,
                 walletSource = null,
@@ -320,7 +350,8 @@ class BookViewModel @Inject constructor(
                 isWalletSourceExpanded = false,
                 isWalletDestinationExpanded = false,
                 currentTransactionId = 0,
-                isEdit = false
+                isEdit = false,
+                oldNominal = 0.0
             )
         }
     }

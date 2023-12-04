@@ -232,7 +232,7 @@ fun BookListPerDay(
     val localDateFormatter = DateTimeFormatter.ofPattern("dd-MM EEE").withLocale(Locale("id", "ID"))
     //get both positive sum and negative sum
     val positiveSum = transactionList.filter { transactionCategoryWallet ->
-        transactionCategoryWallet.transaction.balance >= 0 && transactionCategoryWallet.category != null
+        transactionCategoryWallet.transaction.balance > 0 && transactionCategoryWallet.transaction.walletToId == null
     }.sumOf { transactionCategoryWallet ->
         transactionCategoryWallet.transaction.balance
     }
@@ -312,7 +312,10 @@ fun BookListPerDay(
                         viewModel.updateIsEditState(true)
                         viewModel.updateCurrentTransactionId(transactionCategoryWallet.transaction.id)
                         viewModel.updateNoteState(transactionCategoryWallet.transaction.description)
-                        viewModel.updateNominalState(transactionCategoryWallet.transaction.balance.toString())
+                        viewModel.updateOldNominalState(transactionCategoryWallet.transaction.balance)
+                        viewModel.updateNominalState(
+                            (transactionCategoryWallet.transaction.balance * if (transactionCategoryWallet.transaction.balance >= 0) 1 else -1).toString()
+                        )
                         viewModel.updatePickedDateState(transactionCategoryWallet.transaction.date)
                         viewModel.updateFormattedDate(transactionCategoryWallet.transaction.date)
                         viewModel.updateWalletSource(transactionCategoryWallet.walletFrom)

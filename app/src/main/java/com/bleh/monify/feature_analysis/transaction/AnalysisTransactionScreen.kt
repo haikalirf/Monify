@@ -2,7 +2,6 @@ package com.bleh.monify.feature_analysis.transaction
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -41,13 +40,18 @@ import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import com.bleh.monify.R
+import com.bleh.monify.core.data_classes.ChartData
+import com.bleh.monify.core.entities.Category
 import com.bleh.monify.core.enums.CategoryType
 import com.bleh.monify.core.helper.DistinctColors
+import com.bleh.monify.core.helper.degreeToAngle
 import com.bleh.monify.core.helper.indonesianFormatter
 import com.bleh.monify.core.pojos.CategoryWithSumAndPercentage
 import com.bleh.monify.feature_analysis.analysis.AnalysisType
 import com.bleh.monify.ui.theme.Green
 import com.bleh.monify.ui.theme.Red
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -58,6 +62,7 @@ fun AnalysisTransactionCard(
     modifier: Modifier = Modifier,
 ) {
     val state by viewModel.state.collectAsState()
+    val localDateFormatter = DateTimeFormatter.ofPattern("yyyy-MM").withLocale(Locale("id", "ID"))
     val transactionList = if (transactionType == AnalysisType.INCOME) state.incomeList else state.outcomeList
     val distinctColors = DistinctColors()
     val chartDataList = transactionList.map {
@@ -84,18 +89,25 @@ fun AnalysisTransactionCard(
                 .padding(bottom = 20.dp),
         ) {
             IconButton(
-                onClick = { /*TODO*/ }
+                onClick = {
+                    viewModel.previousMonth()
+                }
             ) {
                 Icon(painter = painterResource(id = R.drawable.ic_chevron_left), contentDescription = "left arrow")
             }
-            Text(text = "2023-11")
+            Text(
+                text = state.currentMonth.format(localDateFormatter),
+                style = MaterialTheme.typography.bodyLarge,
+            )
             IconButton(
-                onClick = { /*TODO*/ }
+                onClick = {
+                    viewModel.nextMonth()
+                }
             ) {
                 Icon(painter = painterResource(id = R.drawable.ic_chevron_right), contentDescription = "right arrow")
             }
         }
-        AnalysisPieChart(
+        CategoryPieChart(
             chartDataList = chartDataList,
             sum = if(transactionType == AnalysisType.INCOME) state.incomeSum else state.outcomeSum,
             transactionType = transactionType,
@@ -115,19 +127,23 @@ fun AnalysisTransactionCard(
     }
 }
 
-private val Float.degreeToAngle
-    get() = (this * Math.PI / 180f).toFloat()
-
-data class ChartData(val color: Color, val data: Float, val icon: Painter)
-
 @Composable
-fun AnalysisPieChart(
+fun CategoryPieChart(
     transactionType: AnalysisType,
     chartDataList: List<ChartData>,
     sum: Double,
     modifier: Modifier = Modifier
 ) {
     val formatter = indonesianFormatter()
+    val chartList = chartDataList.ifEmpty {
+        listOf(
+            ChartData(
+                color = Color.Gray,
+                data = 100f,
+                icon = null
+            )
+        )
+    }
     Box(
         modifier = modifier
             .fillMaxSize(),
@@ -166,8 +182,8 @@ fun AnalysisPieChart(
                 )
             )
 
-            for (index in 0..chartDataList.lastIndex) {
-                val chartData = chartDataList[index]
+            for (index in 0..chartList.lastIndex) {
+                val chartData = chartList[index]
                 val sweepAngle = chartData.data * 3.6f
                 val angleInRadians = (startAngle + sweepAngle / 2).degreeToAngle
 
@@ -190,15 +206,17 @@ fun AnalysisPieChart(
                         angleInRadians
                     )
                 ) {
-                    drawCircle(
-                        color = chartData.color,
-                        radius = 18.dp.toPx(),
-                        center = Offset(iconWidth / 2, iconWidth / 2)
-                    )
-                    with(chartData.icon) {
-                        draw(
-                            size = Size(iconWidth, iconWidth)
+                    if (chartData.icon != null) {
+                        drawCircle(
+                            color = chartData.color,
+                            radius = 18.dp.toPx(),
+                            center = Offset(iconWidth / 2, iconWidth / 2)
                         )
+                        with(chartData.icon) {
+                            draw(
+                                size = Size(iconWidth, iconWidth)
+                            )
+                        }
                     }
                 }
 
@@ -214,19 +232,33 @@ fun AnalysisTransactionList(
     categoryList: List<CategoryWithSumAndPercentage>,
     modifier: Modifier = Modifier
 ) {
+    val categories = categoryList.ifEmpty {
+        listOf(
+            CategoryWithSumAndPercentage(
+                category = Category(
+                    id = 0,
+                    name = "Tidak ada data",
+                    icon = -1,
+                    type = CategoryType.OUTCOME,
+                    userId = "",
+                    isDeleted = false
+                ),
+                sum = 0.0,
+                percentage = 0.0
+            )
+        )
+    }
     LazyColumn(
         contentPadding = PaddingValues(bottom = 85.dp),
         modifier = modifier
     ) {
-        categoryList.forEach { category ->
+        categories.forEach { category ->
             item {
                 AnalysisTransactionListItem(
                     transactionType = transactionType,
-                    category = category,
+                    categoryWithSumAndPercentage = category,
                     modifier = Modifier
-                ) {
-
-                }
+                )
             }
         }
     }
@@ -235,11 +267,16 @@ fun AnalysisTransactionList(
 @Composable
 fun AnalysisTransactionListItem(
     transactionType: CategoryType,
-    category: CategoryWithSumAndPercentage,
+    categoryWithSumAndPercentage: CategoryWithSumAndPercentage,
     modifier: Modifier = Modifier,
-    onClick: () -> Unit,
+    onClick: () -> Unit = {},
 ) {
     val formatter = indonesianFormatter()
+    val icon = if (categoryWithSumAndPercentage.category.icon == -1) {
+        painterResource(id = R.drawable.ic_cancel)
+    } else {
+        painterResource(id = categoryWithSumAndPercentage.category.icon)
+    }
     Column(
         modifier = modifier
     ) {
@@ -249,30 +286,30 @@ fun AnalysisTransactionListItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(50.dp)
-                .clickable {
-                    onClick()
-                }
+//                .clickable {
+//                    onClick()
+//                }
                 .padding(horizontal = 20.dp)
         ) {
             Icon(
-                painter = painterResource(id = category.category.icon),
+                painter = icon,
                 contentDescription = "Category Icon"
             )
             Text(
-                text = category.category.name,
+                text = categoryWithSumAndPercentage.category.name,
                 style = MaterialTheme.typography.labelLarge,
                 modifier = Modifier
                     .padding(start = 20.dp)
             )
             Spacer(modifier = Modifier.weight(1f))
             Text(
-                text = String.format("%.2f", category.percentage) + "%",
+                text = String.format("%.2f", categoryWithSumAndPercentage.percentage) + "%",
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier
                     .padding(end = 10.dp)
             )
             Text(
-                text = formatter.format(category.sum),
+                text = formatter.format(categoryWithSumAndPercentage.sum),
                 style = MaterialTheme.typography.labelSmall,
                 color = if (transactionType == CategoryType.INCOME) Green else Red
             )

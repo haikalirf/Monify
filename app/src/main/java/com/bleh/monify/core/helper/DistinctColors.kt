@@ -2,7 +2,7 @@ package com.bleh.monify.core.helper
 
 import androidx.compose.ui.graphics.Color
 
-class DistinctColors() {
+class DistinctColors {
     private val colors = listOf(
         Color(0xFFFFB300),    // Vivid Yellow
         Color(0xFF803E75),    // Strong Purple

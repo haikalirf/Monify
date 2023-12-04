@@ -19,6 +19,7 @@ import javax.inject.Inject
 
 data class AnalysisTransactionState(
     val analysisType: AnalysisType = AnalysisType.OUTCOME,
+    val currentMonth: LocalDate = LocalDate.now(),
     val incomeList: List<CategoryWithSumAndPercentage> = listOf(),
     val incomeSum: Double = 0.0,
     val outcomeList: List<CategoryWithSumAndPercentage> = listOf(),
@@ -41,7 +42,7 @@ class AnalysisTransactionViewModel @Inject constructor(
     }
 
     private fun getIncomes() {
-        val endDate = LocalDate.now()
+        val endDate = _state.value.currentMonth
         val startDate = endDate.minusDays(30)
         viewModelScope.launch {
             transactionDao.sumOfCategoriesInRangeAndType(startDate, endDate, CategoryType.INCOME).flowOn(Dispatchers.IO).collect { incomeList ->
@@ -53,7 +54,7 @@ class AnalysisTransactionViewModel @Inject constructor(
     }
 
     private fun getIncomeSum() {
-        val endDate = LocalDate.now()
+        val endDate = _state.value.currentMonth
         val startDate = endDate.minusDays(30)
         viewModelScope.launch {
             transactionDao.sumOfPositiveInRange(startDate, endDate).flowOn(Dispatchers.IO).collect { incomeSum ->
@@ -65,7 +66,7 @@ class AnalysisTransactionViewModel @Inject constructor(
     }
 
     private fun getOutcomes() {
-        val endDate = LocalDate.now()
+        val endDate = _state.value.currentMonth
         val startDate = endDate.minusDays(30)
         viewModelScope.launch {
             transactionDao.sumOfCategoriesInRangeAndType(startDate, endDate, CategoryType.OUTCOME).flowOn(Dispatchers.IO).collect { outcomeList ->
@@ -77,7 +78,7 @@ class AnalysisTransactionViewModel @Inject constructor(
     }
 
     private fun getOutcomeSum() {
-        val endDate = LocalDate.now()
+        val endDate = _state.value.currentMonth
         val startDate = endDate.minusDays(30)
         viewModelScope.launch {
             transactionDao.sumOfNegativeInRange(startDate, endDate).flowOn(Dispatchers.IO).collect { outcomeSum ->
@@ -86,6 +87,26 @@ class AnalysisTransactionViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    fun previousMonth() {
+        _state.update {
+            it.copy(currentMonth = it.currentMonth.minusMonths(1))
+        }
+        getIncomes()
+        getIncomeSum()
+        getOutcomes()
+        getOutcomeSum()
+    }
+
+    fun nextMonth() {
+        _state.update {
+            it.copy(currentMonth = it.currentMonth.plusMonths(1))
+        }
+        getIncomes()
+        getIncomeSum()
+        getOutcomes()
+        getOutcomeSum()
     }
 
     fun updateAnalysisType (type: AnalysisType) {

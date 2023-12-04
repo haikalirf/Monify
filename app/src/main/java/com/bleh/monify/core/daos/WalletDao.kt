@@ -1,7 +1,6 @@
 package com.bleh.monify.core.daos
 
 import androidx.room.Dao
-import androidx.room.Delete
 import androidx.room.Query
 import androidx.room.Upsert
 import com.bleh.monify.core.entities.Wallet
@@ -20,4 +19,7 @@ interface WalletDao {
 
     @Query("SELECT SUM(balance) as sum FROM wallet")
     fun walletSum(): Flow<Double>
+
+    @Query("UPDATE Wallet SET balance = balance + :balanceToAdd WHERE id = :id")
+    fun addWalletBalance(id: Int, balanceToAdd: Double)
 }

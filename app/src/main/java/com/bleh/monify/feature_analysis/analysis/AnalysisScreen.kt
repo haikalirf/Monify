@@ -137,12 +137,12 @@ fun AnalysisScreen(
                             .fillMaxWidth()
                     )
                     2 -> AnalysisBudgetCard(
-                        viewModel = AnalysisBudgetViewModel(),
+                        viewModel = hiltViewModel<AnalysisBudgetViewModel>(),
                         modifier = Modifier
                             .fillMaxWidth()
                     )
                     3 -> AnalysisComparisonCard(
-                        viewModel = AnalysisComparisonViewModel(),
+                        viewModel = hiltViewModel<AnalysisComparisonViewModel>(),
                         modifier = Modifier
                             .fillMaxSize()
                     )

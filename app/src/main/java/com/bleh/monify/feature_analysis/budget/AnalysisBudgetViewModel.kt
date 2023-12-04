@@ -1,57 +1,48 @@
 package com.bleh.monify.feature_analysis.budget
 
 import androidx.lifecycle.ViewModel
-import com.bleh.monify.R
+import androidx.lifecycle.viewModelScope
+import com.bleh.monify.core.daos.BudgetDao
+import com.bleh.monify.core.entities.Budget
 import com.bleh.monify.core.enums.BudgetType
+import com.bleh.monify.core.pojos.BudgetCategory
+import com.bleh.monify.feature_auth.GoogleAuthClient
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import javax.inject.Inject
-
-
-data class UiBudget(
-    val icon: Int,
-    val name: String,
-    val amount: Double,
-    val used: Double,
-    val budgetType: BudgetType
-)
 
 data class AnalysisBudgetState(
     val budgetTimeFrame: BudgetType = BudgetType.MONTHLY,
     val isDropDownExpanded: Boolean = false,
-    val uiBudgetLists: List<UiBudget> = listOf(
-        UiBudget(
-            icon = R.drawable.ic_food,
-            name = "Manakan & Minuman",
-            amount = 800000.0,
-            used = 800000.0,
-            budgetType = BudgetType.MONTHLY
-        ),
-        UiBudget(
-            icon = R.drawable.ic_health,
-            name = "Kesehatan",
-            amount = 200000.0,
-            used = 400000.0,
-            budgetType = BudgetType.MONTHLY
-        ),
-        UiBudget(
-            icon = R.drawable.ic_education,
-            name = "Pendidikan",
-            amount = 10000000.0,
-            used = 1000000.0,
-            budgetType = BudgetType.MONTHLY
-        ),
-    )
+    val budgetList: List<BudgetCategory> = listOf()
 )
 
 @HiltViewModel
 class AnalysisBudgetViewModel @Inject constructor(
-
+    private val googleAuthClient: GoogleAuthClient,
+    private val budgetDao: BudgetDao
 ): ViewModel() {
     private val _state = MutableStateFlow(AnalysisBudgetState())
     val state = _state.asStateFlow()
+
+    init {
+        getBudgets()
+    }
+
+    private fun getBudgets() {
+        viewModelScope.launch {
+            budgetDao.getBudgetsWithCategory().flowOn(Dispatchers.IO).collect { budgetList ->
+                _state.update {
+                    it.copy(budgetList = budgetList)
+                }
+            }
+        }
+    }
 
     fun updateBudgetTimeFrame (timeFrame: BudgetType) {
         _state.update {
@@ -62,12 +53,6 @@ class AnalysisBudgetViewModel @Inject constructor(
     fun updateDropDownExpanded (isExpanded: Boolean) {
         _state.update {
             it.copy(isDropDownExpanded = isExpanded)
-        }
-    }
-
-    fun updateBudgetList (list: List<UiBudget>) {
-        _state.update {
-            it.copy(uiBudgetLists = list)
         }
     }
 }

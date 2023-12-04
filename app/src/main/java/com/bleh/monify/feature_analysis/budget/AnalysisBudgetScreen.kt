@@ -5,6 +5,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -42,8 +43,10 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.PopupProperties
 import com.bleh.monify.R
+import com.bleh.monify.core.entities.Budget
 import com.bleh.monify.core.enums.BudgetType
 import com.bleh.monify.core.helper.indonesianFormatter
+import com.bleh.monify.core.pojos.BudgetCategory
 import com.bleh.monify.ui.theme.Accent
 import com.bleh.monify.ui.theme.Grey
 import java.text.NumberFormat
@@ -187,13 +190,15 @@ fun BudgetList(
 ) {
     val state by viewModel.state.collectAsState()
     LazyColumn(
+        contentPadding = PaddingValues(bottom = 85.dp),
         modifier = modifier
             .fillMaxWidth()
     ) {
-        state.uiBudgetLists.forEach {
+        state.budgetList.forEach {
             item {
                 BudgetListItem(
-                    uiBudget = it,
+                    budgetTimeFrame = state.budgetTimeFrame,
+                    budgetCategory = it,
                     modifier = Modifier
                         .padding(bottom = 10.dp)
                 )
@@ -204,11 +209,21 @@ fun BudgetList(
 
 @Composable
 fun BudgetListItem(
-    uiBudget: UiBudget,
+    budgetTimeFrame: BudgetType,
+    budgetCategory: BudgetCategory,
     modifier: Modifier = Modifier
 ) {
-    //TODO THIS FOR THE WHOLE APP
     val formatter: NumberFormat = indonesianFormatter()
+    val amount = if (budgetTimeFrame == BudgetType.MONTHLY) {
+        budgetCategory.budget.monthlyAmount
+    } else {
+        budgetCategory.budget.weeklyAmount
+    } ?: 0.0
+    val used = if (budgetTimeFrame == BudgetType.MONTHLY) {
+        budgetCategory.budget.monthlyUsed
+    } else {
+        budgetCategory.budget.weeklyUsed
+    }
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -230,7 +245,7 @@ fun BudgetListItem(
                 .padding(top = 10.dp, bottom = 5.dp)
         ) {
             Icon(
-                painter = painterResource(id = uiBudget.icon),
+                painter = painterResource(id = budgetCategory.category.icon),
                 contentDescription = "Budget icon"
             )
             Spacer(
@@ -242,17 +257,17 @@ fun BudgetListItem(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(
-                    text = uiBudget.name,
+                    text = budgetCategory.category.name,
                     style = MaterialTheme.typography.labelSmall,
                 )
                 Text(
-                    text = formatter.format(uiBudget.amount),
+                    text = formatter.format(amount),
                     style = MaterialTheme.typography.bodyMedium,
                 )
             }
         }
         BudgetProgressBar(
-            progress = (uiBudget.used / uiBudget.amount).toFloat(),
+            progress = (used / amount).toFloat(),
             modifier = Modifier
                 .fillMaxWidth()
                 .height(16.dp)
@@ -281,10 +296,10 @@ fun BudgetListItem(
                 .fillMaxWidth()
         ) {
             Text(
-                text = formatter.format(uiBudget.used),
+                text = formatter.format(used),
                 style = MaterialTheme.typography.bodySmall,
             )
-            val leftOver = uiBudget.amount - uiBudget.used
+            val leftOver = amount - used
             val isOverBudget = leftOver < 0
             Text(
                 text = formatter.format(leftOver),
@@ -328,14 +343,4 @@ fun BudgetProgressBar(
             style = MaterialTheme.typography.bodySmall,
         )
     }
-}
-
-//@Preview
-@Composable
-fun AnalysisBudgetCardPreview() {
-    AnalysisBudgetCard(
-        viewModel = AnalysisBudgetViewModel(),
-        modifier = Modifier
-            .fillMaxSize()
-    )
 }

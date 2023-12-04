@@ -1,6 +1,5 @@
 package com.bleh.monify.feature_wallet.wallet
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable

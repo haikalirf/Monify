@@ -1,73 +1,43 @@
 package com.bleh.monify.feature_analysis.comparison
 
-import android.graphics.Typeface
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.nativeCanvas
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.bleh.monify.R
+import com.bleh.monify.core.data_classes.ChartData
 import com.bleh.monify.core.helper.indonesianFormatter
-import com.bleh.monify.feature_analysis.transaction.AnalysisPieChart
-import com.bleh.monify.feature_analysis.transaction.AnalysisTransactionList
-import com.bleh.monify.ui.theme.Accent
 import com.bleh.monify.ui.theme.Green
-import com.bleh.monify.ui.theme.Grey
 import com.bleh.monify.ui.theme.Red
-import com.patrykandpatrick.vico.compose.axis.horizontal.rememberBottomAxis
-import com.patrykandpatrick.vico.compose.axis.vertical.rememberStartAxis
-import com.patrykandpatrick.vico.compose.chart.Chart
-import com.patrykandpatrick.vico.compose.chart.column.columnChart
-import com.patrykandpatrick.vico.compose.chart.line.lineChart
-import com.patrykandpatrick.vico.compose.component.lineComponent
-import com.patrykandpatrick.vico.compose.component.shapeComponent
-import com.patrykandpatrick.vico.compose.m3.style.m3ChartStyle
-import com.patrykandpatrick.vico.compose.style.ChartStyle
-import com.patrykandpatrick.vico.compose.style.ProvideChartStyle
-import com.patrykandpatrick.vico.compose.style.currentChartStyle
-import com.patrykandpatrick.vico.core.axis.AxisPosition
-import com.patrykandpatrick.vico.core.axis.formatter.AxisValueFormatter
-import com.patrykandpatrick.vico.core.axis.vertical.VerticalAxis
-import com.patrykandpatrick.vico.core.chart.column.ColumnChart
-import com.patrykandpatrick.vico.core.chart.composed.ComposedChartEntryModel
-import com.patrykandpatrick.vico.core.chart.composed.plus
-import com.patrykandpatrick.vico.core.component.shape.LineComponent
-import com.patrykandpatrick.vico.core.component.shape.Shapes
-import com.patrykandpatrick.vico.core.component.text.textComponent
-import com.patrykandpatrick.vico.core.entry.ChartEntryModel
-import com.patrykandpatrick.vico.core.entry.ChartEntryModelProducer
-import com.patrykandpatrick.vico.core.entry.composed.ComposedChartEntryModelProducer
-import com.patrykandpatrick.vico.core.entry.composed.plus
-import com.patrykandpatrick.vico.core.entry.entriesOf
-import com.patrykandpatrick.vico.core.entry.entryModelOf
-import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @Composable
 fun AnalysisComparisonCard(
@@ -75,6 +45,7 @@ fun AnalysisComparisonCard(
     modifier: Modifier = Modifier
 ) {
     val state by viewModel.state.collectAsState()
+    val localDateFormatter = DateTimeFormatter.ofPattern("yyyy-MM").withLocale(Locale("id", "ID"))
     val formatter = indonesianFormatter()
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -93,27 +64,40 @@ fun AnalysisComparisonCard(
                 .padding(bottom = 20.dp),
         ) {
             IconButton(
-                onClick = { /*TODO*/ }
+                onClick = { viewModel.prevMonth() }
             ) {
                 Icon(painter = painterResource(id = R.drawable.ic_chevron_left), contentDescription = "left arrow")
             }
-            Text(text = "2023-11")
+            Text(text = state.currentMonth.format(localDateFormatter))
             IconButton(
-                onClick = { /*TODO*/ }
+                onClick = { viewModel.nextMonth() }
             ) {
                 Icon(painter = painterResource(id = R.drawable.ic_chevron_right), contentDescription = "right arrow")
             }
         }
-        //TODO pie chart
-        ComparisonBarChart(
-            viewModel = viewModel,
+        val total = state.currentIncome + state.currentOutcome * -1
+        val chartDataList = listOf(
+            ChartData(
+                color = Green,
+                data = state.currentIncome.toFloat() * 100f / total.toFloat(),
+                icon = painterResource(id = R.drawable.ic_chevron_right)
+            ),
+            ChartData(
+                color = Red,
+                data = state.currentOutcome.toFloat() * 100f / total.toFloat() * -1f,
+                icon = painterResource(id = R.drawable.ic_chevron_left)
+            )
+        )
+        ComparisonPieChart(
+            chartDataList = chartDataList,
             modifier = Modifier
-                .padding(horizontal = 20.dp)
-                .padding(bottom = 60.dp)
+                .fillMaxWidth()
+                .padding(top = 20.dp)
         )
         ComparisonProgressBar(
-            progress = state.outcome.toFloat() / (state.income.toFloat() + state.outcome.toFloat()),
+            progress = (state.currentOutcome.toFloat()*-1f) / (state.currentIncome.toFloat() + (state.currentOutcome.toFloat()*-1f)),
             modifier = Modifier
+                .padding(top = 20.dp)
                 .fillMaxWidth()
                 .height(16.dp)
                 .clip(RoundedCornerShape(10.dp))
@@ -141,11 +125,11 @@ fun AnalysisComparisonCard(
                 .fillMaxWidth()
         ) {
             Text(
-                text = formatter.format(state.outcome),
+                text = formatter.format(state.currentOutcome),
                 style = MaterialTheme.typography.bodySmall,
             )
             Text(
-                text = formatter.format(state.income),
+                text = formatter.format(state.currentIncome),
                 style = MaterialTheme.typography.bodySmall,
                 color = Color.Black
             )
@@ -154,68 +138,117 @@ fun AnalysisComparisonCard(
 }
 
 @Composable
-fun ComparisonBarChart(
-    viewModel: AnalysisComparisonViewModel,
+fun ComparisonPieChart(
+    chartDataList: List<ChartData>,
     modifier: Modifier = Modifier
 ) {
-    val state by viewModel.state.collectAsState()
-    val data = listOf(
-        "Pengeluaran" to state.outcome,
-        "Pemasukan" to state.income
-    ).associate { (xValue, yValue) ->
-        xValue to yValue
-    }
-    val horizontalAxisValueFormatter = AxisValueFormatter<AxisPosition.Horizontal.Bottom> { value, _ ->
-        data.keys.elementAt(value.toInt())
-    }
-    val outcomeModel = ChartEntryModelProducer(entriesOf(state.outcome, 0f))
-    val incomeModel = ChartEntryModelProducer(entriesOf(0f, state.income))
-    val composedModel = outcomeModel + incomeModel
-    val outcomeChart = columnChart(
-        columns = listOf(
-            LineComponent(
-                color = Red.toArgb(),
-                thicknessDp = 10f,
-                shape = shapeComponent(
-                    shape = RoundedCornerShape(5.dp),
-                ).shape
+    val chartList = chartDataList.ifEmpty {
+        listOf(
+            ChartData(
+                color = Color.Gray,
+                data = 100f,
+                icon = null
             )
         )
-    )
-    val incomeChart = columnChart(
-        columns = listOf(
-            LineComponent(
-                color = Green.toArgb(),
-                thicknessDp = 10f,
-                shape = shapeComponent(
-                    shape = RoundedCornerShape(5.dp),
-                ).shape
-            )
-        )
-    )
-    Chart(
-        chart = remember(outcomeChart, incomeChart) {outcomeChart + incomeChart},
-        model = composedModel.getModel(),
-        startAxis = rememberStartAxis(
-            title = "Rupiah",
-            titleComponent = textComponent {
-                color = Color.Black.toArgb()
-                typeface = Typeface.SANS_SERIF
-            },
-        ),
-        bottomAxis = rememberBottomAxis(
-            label = textComponent {
-                color = Color.Black.toArgb()
-                typeface = Typeface.SANS_SERIF
-            },
-            guideline = lineComponent(
-                color = Color.Transparent
-            ),
-            valueFormatter = horizontalAxisValueFormatter
-        ),
+    }
+    Box(
         modifier = modifier
-    )
+            .fillMaxWidth(),
+        contentAlignment = Alignment.Center
+    ) {
+        Canvas(
+            modifier = Modifier
+                .fillMaxWidth(.7f)
+                .aspectRatio(1f)
+        ) {
+            val width = size.width
+            val strokeWidth = 40.dp.toPx()
+
+            var startAngle = -90f
+
+            for (index in 0..chartList.lastIndex) {
+                val chartData = chartList[index]
+                val sweepAngle = chartData.data * 3.6f
+
+                drawArc(
+                    color = chartData.color,
+                    startAngle = startAngle,
+                    sweepAngle = sweepAngle,
+                    useCenter = false,
+                    topLeft = Offset(strokeWidth / 2, strokeWidth / 2),
+                    size = Size(width - strokeWidth, width - strokeWidth),
+                    style = Stroke(strokeWidth)
+                )
+
+                startAngle += sweepAngle
+            }
+        }
+    }
 }
+
+//@Composable
+//fun ComparisonBarChart(
+//    viewModel: AnalysisComparisonViewModel,
+//    modifier: Modifier = Modifier
+//) {
+//    val state by viewModel.state.collectAsState()
+//    val data = listOf(
+//        "Pengeluaran" to state.outcome,
+//        "Pemasukan" to state.income
+//    ).associate { (xValue, yValue) ->
+//        xValue to yValue
+//    }
+//    val horizontalAxisValueFormatter = AxisValueFormatter<AxisPosition.Horizontal.Bottom> { value, _ ->
+//        data.keys.elementAt(value.toInt())
+//    }
+//    val outcomeModel = ChartEntryModelProducer(entriesOf(state.outcome, 0f))
+//    val incomeModel = ChartEntryModelProducer(entriesOf(0f, state.income))
+//    val composedModel = outcomeModel + incomeModel
+//    val outcomeChart = columnChart(
+//        columns = listOf(
+//            LineComponent(
+//                color = Red.toArgb(),
+//                thicknessDp = 10f,
+//                shape = shapeComponent(
+//                    shape = RoundedCornerShape(5.dp),
+//                ).shape
+//            )
+//        )
+//    )
+//    val incomeChart = columnChart(
+//        columns = listOf(
+//            LineComponent(
+//                color = Green.toArgb(),
+//                thicknessDp = 10f,
+//                shape = shapeComponent(
+//                    shape = RoundedCornerShape(5.dp),
+//                ).shape
+//            )
+//        )
+//    )
+//    Chart(
+//        chart = remember(outcomeChart, incomeChart) {outcomeChart + incomeChart},
+//        model = composedModel.getModel(),
+//        startAxis = rememberStartAxis(
+//            title = "Rupiah",
+//            titleComponent = textComponent {
+//                color = Color.Black.toArgb()
+//                typeface = Typeface.SANS_SERIF
+//            },
+//        ),
+//        bottomAxis = rememberBottomAxis(
+//            label = textComponent {
+//                color = Color.Black.toArgb()
+//                typeface = Typeface.SANS_SERIF
+//            },
+//            guideline = lineComponent(
+//                color = Color.Transparent
+//            ),
+//            valueFormatter = horizontalAxisValueFormatter
+//        ),
+//        modifier = modifier
+//    )
+//}
 
 @Composable
 fun ComparisonProgressBar(
