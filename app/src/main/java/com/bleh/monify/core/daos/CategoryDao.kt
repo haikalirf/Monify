@@ -14,11 +14,8 @@ abstract class CategoryDao: BudgetDao {
     @Upsert
     abstract suspend fun upsertCategory(category: Category): Long
 
-//    @Delete
-//    suspend fun deleteCategory(category: Category)
-
-    @Query("SELECT * FROM category")
-    abstract fun getCategories(): Flow<List<Category>>
+    @Query("SELECT * FROM category WHERE userId = :userId")
+    abstract fun getCategories(userId: String): Flow<List<Category>>
 
     @Query("UPDATE category SET isDeleted = 1 WHERE id = :id")
     abstract fun setDeletedTrue(id: Int)

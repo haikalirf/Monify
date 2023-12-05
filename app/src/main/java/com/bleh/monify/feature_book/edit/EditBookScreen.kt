@@ -116,19 +116,15 @@ fun EditBookScreen(
             initialPage = 1,
         ) { 3 }
         LaunchedEffect(pagerState.currentPage) {
-            Log.d("pager state", "isEdit: ${state.isEdit}")
             if (!state.isEdit) {
                 delay(200)
-                Log.d("pager state", "Pager state: ${pagerState.currentPage}")
                 viewModel.resetInputState()
                 viewModel.updateTransactionType(pagerState.currentPage)
             }
         }
         val animationSpec: AnimationSpec<Float> = tween(durationMillis = 250, easing = FastOutSlowInEasing)
         LaunchedEffect(state.transactionType) {
-            Log.d("pager state", "isEdit: ${state.isEdit}")
             if (!state.isEdit) {
-                Log.d("transaction type", "Transaction type: ${state.transactionType}")
                 pagerState.animateScrollToPage(
                     page = state.transactionType,
                     animationSpec = animationSpec
@@ -960,7 +956,9 @@ fun CategoryGrid(
     modifier: Modifier = Modifier
 ) {
     val state by viewModel.state.collectAsState()
-    val categoryList = state.categoryList
+    val categoryList = state.categoryList.filter {
+        it.type.value == state.transactionType
+    }
     LazyVerticalGrid(
         columns = GridCells.Fixed(4),
         contentPadding = PaddingValues(vertical = 20.dp),
@@ -982,6 +980,10 @@ fun CategoryGrid(
                 ) {
                     viewModel.updateSelectedCategory(index)
                     viewModel.updateSelectedCategoryId(category.id)
+                    Log.d("Category", "Category: ${category.name}")
+                    Log.d("Category", "Index: $index")
+                    Log.d("Category", "Selected Category: ${state.selectedCategory}")
+                    Log.d("Category", "Selected Category Id: ${state.selectedCategoryId}")
                 }
             }
         }

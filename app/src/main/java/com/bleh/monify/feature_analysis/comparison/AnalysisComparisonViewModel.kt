@@ -29,6 +29,8 @@ class AnalysisComparisonViewModel @Inject constructor(
     private val _state = MutableStateFlow(AnalysisComparisonState())
     val state = _state.asStateFlow()
 
+    private val currentUser = googleAuthClient.getLoggedInUser()
+
     init {
         getIncomes()
         getOutcomes()
@@ -38,7 +40,7 @@ class AnalysisComparisonViewModel @Inject constructor(
         val endDate = _state.value.currentMonth
         val startDate = endDate.minusDays(30)
         viewModelScope.launch {
-            transactionDao.sumOfPositiveInRange(startDate, endDate).flowOn(Dispatchers.IO).collect { currentIncome ->
+            transactionDao.sumOfPositiveInRange(startDate, endDate, currentUser!!.userId).flowOn(Dispatchers.IO).collect { currentIncome ->
                 _state.update {
                     it.copy(currentIncome = currentIncome)
                 }
@@ -50,7 +52,7 @@ class AnalysisComparisonViewModel @Inject constructor(
         val endDate = _state.value.currentMonth
         val startDate = endDate.minusDays(30)
         viewModelScope.launch {
-            transactionDao.sumOfNegativeInRange(startDate, endDate).flowOn(Dispatchers.IO).collect { currentOutcome ->
+            transactionDao.sumOfNegativeInRange(startDate, endDate, currentUser!!.userId).flowOn(Dispatchers.IO).collect { currentOutcome ->
                 _state.update {
                     it.copy(currentOutcome = currentOutcome)
                 }

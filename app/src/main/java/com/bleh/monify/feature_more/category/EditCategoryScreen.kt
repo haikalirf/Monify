@@ -152,6 +152,7 @@ fun EditCategoryCard(
                     includeFontPadding = false
                 )
             ),
+            singleLine = true,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(55.dp)

@@ -11,5 +11,6 @@ fun walletIconList(): List<Int> {
         R.drawable.gopay,
         R.drawable.ovo,
         R.drawable.panin,
+        R.drawable.ic_wallet
     )
 }

@@ -115,6 +115,7 @@ fun TimeframeDropDown(
                 )
             },
             readOnly = true,
+            singleLine = true,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(55.dp)
@@ -195,13 +196,24 @@ fun BudgetList(
             .fillMaxWidth()
     ) {
         state.budgetList.forEach {
-            item {
-                BudgetListItem(
-                    budgetTimeFrame = state.budgetTimeFrame,
-                    budgetCategory = it,
-                    modifier = Modifier
-                        .padding(bottom = 10.dp)
-                )
+            if (state.budgetTimeFrame == BudgetType.MONTHLY && it.budget.monthlyAmount != null) {
+                item {
+                    BudgetListItem(
+                        budgetTimeFrame = state.budgetTimeFrame,
+                        budgetCategory = it,
+                        modifier = Modifier
+                            .padding(bottom = 10.dp)
+                    )
+                }
+            } else if (state.budgetTimeFrame == BudgetType.WEEKLY && it.budget.weeklyAmount != null) {
+                item {
+                    BudgetListItem(
+                        budgetTimeFrame = state.budgetTimeFrame,
+                        budgetCategory = it,
+                        modifier = Modifier
+                            .padding(bottom = 10.dp)
+                    )
+                }
             }
         }
     }
@@ -299,10 +311,9 @@ fun BudgetListItem(
                 text = formatter.format(used),
                 style = MaterialTheme.typography.bodySmall,
             )
-            val leftOver = amount - used
-            val isOverBudget = leftOver < 0
+            val isOverBudget = used >= amount
             Text(
-                text = formatter.format(leftOver),
+                text = formatter.format(amount),
                 style = MaterialTheme.typography.bodySmall,
                 color = if(isOverBudget) Color.Red else Color.Black
             )

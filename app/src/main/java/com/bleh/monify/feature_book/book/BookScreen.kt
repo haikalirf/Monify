@@ -125,6 +125,7 @@ fun SearchBar(
                 contentDescription = "Search Icon"
             )
         },
+        singleLine = true,
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 10.dp)
@@ -320,17 +321,14 @@ fun BookListPerDay(
                         viewModel.updateFormattedDate(transactionCategoryWallet.transaction.date)
                         viewModel.updateWalletSource(transactionCategoryWallet.walletFrom)
                         Log.d("BookScreen", "BookListPerDay: ${transactionCategoryWallet.walletFrom.name}")
-                        when(isTransfer) {
-                            true -> {
-                                viewModel.updateTransactionType(2)
-                                viewModel.updateWalletDestination(transactionCategoryWallet.walletTo!!)
-                                viewModel.updateAdminState(transactionCategoryWallet.transaction.admin.toString())
-                            }
-                            false -> {
-                                viewModel.updateTransactionType(if(transactionCategoryWallet.transaction.balance >= 0) 1 else 0)
-                                viewModel.updateSelectedCategory(iconList.indexOf(icon))
-                                viewModel.updateSelectedCategoryId(transactionCategoryWallet.category!!.id)
-                            }
+                        if (isTransfer) {
+                            viewModel.updateTransactionType(2)
+                            viewModel.updateWalletDestination(transactionCategoryWallet.walletTo!!)
+                            viewModel.updateAdminState(transactionCategoryWallet.transaction.admin.toString())
+                        } else {
+                            viewModel.updateTransactionType(if(transactionCategoryWallet.transaction.balance >= 0) 0 else 1)
+                            viewModel.updateSelectedCategory(iconList.indexOf(icon))
+                            viewModel.updateSelectedCategoryId(transactionCategoryWallet.category!!.id)
                         }
                         navController.navigate("book_add")
                     }

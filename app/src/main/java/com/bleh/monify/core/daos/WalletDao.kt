@@ -11,14 +11,14 @@ interface WalletDao {
     @Upsert
     suspend fun upsertWallet(wallet: Wallet)
 
-    @Query("SELECT * FROM wallet")
-    fun getWallets(): Flow<List<Wallet>>
+    @Query("SELECT * FROM wallet WHERE userId = :userId")
+    fun getWallets(userId: String): Flow<List<Wallet>>
 
     @Query("UPDATE wallet SET isDeleted = 1 WHERE id = :id")
     fun setDeletedTrue(id: Int)
 
-    @Query("SELECT SUM(balance) as sum FROM wallet")
-    fun walletSum(): Flow<Double>
+    @Query("SELECT SUM(balance) as sum FROM wallet WHERE userId = :userId")
+    fun walletSum(userId: String): Flow<Double>
 
     @Query("UPDATE Wallet SET balance = balance + :balanceToAdd WHERE id = :id")
     fun addWalletBalance(id: Int, balanceToAdd: Double)

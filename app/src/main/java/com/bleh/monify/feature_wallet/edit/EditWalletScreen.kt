@@ -157,7 +157,7 @@ fun AddWalletCard(
                     includeFontPadding = false
                 )
             ),
-            maxLines = 1,
+            singleLine = true,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(55.dp)
@@ -184,16 +184,7 @@ fun AddWalletCard(
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Decimal
             ),
-            prefix = {
-                Text(
-                    text = "Rp ",
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier
-                        .height(55.dp)
-                        .padding(bottom = 5.dp)
-                )
-            },
-            maxLines = 1,
+            singleLine = true,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(55.dp)

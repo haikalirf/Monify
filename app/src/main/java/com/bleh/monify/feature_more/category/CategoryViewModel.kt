@@ -45,7 +45,7 @@ class CategoryViewModel @Inject constructor(
 
     private fun getCategory () {
         viewModelScope.launch {
-            categoryDao.getCategories().flowOn(Dispatchers.IO).collect { categories ->
+            categoryDao.getCategories(currentUser!!.userId).flowOn(Dispatchers.IO).collect { categories ->
                 _state.update {
                     it.copy(categories = categories)
                 }

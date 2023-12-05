@@ -2,9 +2,7 @@ package com.bleh.monify.feature_more.budget
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.bleh.monify.R
 import com.bleh.monify.core.daos.BudgetDao
-import com.bleh.monify.core.entities.Budget
 import com.bleh.monify.core.enums.BudgetType
 import com.bleh.monify.core.pojos.BudgetCategory
 import com.bleh.monify.feature_auth.GoogleAuthClient
@@ -78,17 +76,28 @@ class BudgetViewModel @Inject constructor(
 
     fun updateWeeklyBudget (id: Int, amount: Double?) {
         viewModelScope.launch {
-            budgetDao.updateWeeklyAmount(id, amount)
+            budgetDao.updateWeeklyBudget(id, amount)
         }
     }
 
     fun updateMonthlyBudget (id: Int, amount: Double?) {
         viewModelScope.launch {
-            budgetDao.updateMonthlyAmount(id, amount)
+            budgetDao.updateMonthlyBudget(id, amount)
+        }
+    }
+
+    fun updateWeeklyUsed (id: Int, amount: Double?) {
+        viewModelScope.launch {
+            budgetDao.addWeeklyUsed(id, amount)
+        }
+    }
+
+    fun updateMonthlyUsed (id: Int, amount: Double?) {
+        viewModelScope.launch {
+            budgetDao.addMonthlyUsed(id, amount)
         }
     }
 
     fun resetInputState() {
-
     }
 }

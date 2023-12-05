@@ -176,7 +176,7 @@ fun LoginCard(
             OutlinedTextField(
                 value = emailState,
                 onValueChange = onEmailChange,
-                maxLines = 1,
+                singleLine = true,
                 modifier = Modifier
                     .padding(horizontal = 30.dp)
                     .padding(top = 40.dp)
@@ -184,7 +184,7 @@ fun LoginCard(
             OutlinedTextField(
                 value = passwordState,
                 onValueChange = onPasswordChange,
-                maxLines = 1,
+                singleLine = true,
                 visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 trailingIcon = {
                     IconButton(

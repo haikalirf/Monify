@@ -34,6 +34,8 @@ class AnalysisTransactionViewModel @Inject constructor(
     private val _state = MutableStateFlow(AnalysisTransactionState())
     val state = _state.asStateFlow()
 
+    private val currentUser = googleAuthClient.getLoggedInUser()
+
     init {
         getIncomes()
         getIncomeSum()
@@ -45,7 +47,7 @@ class AnalysisTransactionViewModel @Inject constructor(
         val endDate = _state.value.currentMonth
         val startDate = endDate.minusDays(30)
         viewModelScope.launch {
-            transactionDao.sumOfCategoriesInRangeAndType(startDate, endDate, CategoryType.INCOME).flowOn(Dispatchers.IO).collect { incomeList ->
+            transactionDao.sumOfCategoriesInRangeAndType(startDate, endDate, CategoryType.INCOME, currentUser!!.userId).flowOn(Dispatchers.IO).collect { incomeList ->
                 _state.update {
                     it.copy(incomeList = incomeList)
                 }
@@ -57,7 +59,7 @@ class AnalysisTransactionViewModel @Inject constructor(
         val endDate = _state.value.currentMonth
         val startDate = endDate.minusDays(30)
         viewModelScope.launch {
-            transactionDao.sumOfPositiveInRange(startDate, endDate).flowOn(Dispatchers.IO).collect { incomeSum ->
+            transactionDao.sumOfPositiveInRange(startDate, endDate, currentUser!!.userId).flowOn(Dispatchers.IO).collect { incomeSum ->
                 _state.update {
                     it.copy(incomeSum = incomeSum)
                 }
@@ -69,7 +71,7 @@ class AnalysisTransactionViewModel @Inject constructor(
         val endDate = _state.value.currentMonth
         val startDate = endDate.minusDays(30)
         viewModelScope.launch {
-            transactionDao.sumOfCategoriesInRangeAndType(startDate, endDate, CategoryType.OUTCOME).flowOn(Dispatchers.IO).collect { outcomeList ->
+            transactionDao.sumOfCategoriesInRangeAndType(startDate, endDate, CategoryType.OUTCOME, currentUser!!.userId).flowOn(Dispatchers.IO).collect { outcomeList ->
                 _state.update {
                     it.copy(outcomeList = outcomeList)
                 }
@@ -81,7 +83,7 @@ class AnalysisTransactionViewModel @Inject constructor(
         val endDate = _state.value.currentMonth
         val startDate = endDate.minusDays(30)
         viewModelScope.launch {
-            transactionDao.sumOfNegativeInRange(startDate, endDate).flowOn(Dispatchers.IO).collect { outcomeSum ->
+            transactionDao.sumOfNegativeInRange(startDate, endDate, currentUser!!.userId).flowOn(Dispatchers.IO).collect { outcomeSum ->
                 _state.update {
                     it.copy(outcomeSum = outcomeSum)
                 }

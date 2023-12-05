@@ -14,9 +14,6 @@ interface BudgetDao {
     @Upsert
     suspend fun upsertBudget(budget: Budget)
 
-    @Delete
-    suspend fun deleteBudget(budget: Budget)
-
     @Query("SELECT * FROM budget")
     fun getBudgets(): Flow<List<Budget>>
 
@@ -25,8 +22,14 @@ interface BudgetDao {
     fun getBudgetsWithCategory(): Flow<List<BudgetCategory>>
 
     @Query("UPDATE budget SET weeklyAmount = :amount WHERE id = :id")
-    fun updateWeeklyAmount(id: Int, amount: Double?)
+    fun updateWeeklyBudget(id: Int, amount: Double?)
 
     @Query("UPDATE budget SET monthlyAmount = :amount WHERE id = :id")
-    fun updateMonthlyAmount(id: Int, amount: Double?)
+    fun updateMonthlyBudget(id: Int, amount: Double?)
+
+    @Query("UPDATE budget SET weeklyUsed = weeklyUsed + :amount WHERE id = :id")
+    fun addWeeklyUsed(id: Int, amount: Double?)
+
+    @Query("UPDATE budget SET monthlyUsed = monthlyUsed + :amount WHERE id = :id")
+    fun addMonthlyUsed(id: Int, amount: Double?)
 }

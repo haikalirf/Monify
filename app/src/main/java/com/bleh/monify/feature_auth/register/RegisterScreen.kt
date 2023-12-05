@@ -52,7 +52,6 @@ import com.bleh.monify.core.ui_components.AccentedButton
 import com.bleh.monify.feature_auth.AuthViewModel
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterScreen(
     navController: NavController,
@@ -114,6 +113,7 @@ fun RegisterScreen(
                                     email = signUpResult.data.email?: "",
                                 )
                             )
+                            viewModel.addDatabase(signUpResult.data.userId)
                             viewModel.resetState()
                             navController.navigate("login")
                         }
@@ -168,7 +168,7 @@ fun RegisterCard(
             OutlinedTextField(
                 value = emailState,
                 onValueChange = onEmailChange,
-                maxLines = 1,
+                singleLine = true,
                 modifier = Modifier
                     .padding(horizontal = 30.dp)
                     .padding(top = 40.dp)
@@ -177,7 +177,7 @@ fun RegisterCard(
             OutlinedTextField(
                 value = passwordState,
                 onValueChange = onPasswordChange,
-                maxLines = 1,
+                singleLine = true,
                 visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 trailingIcon = {
                     IconButton(

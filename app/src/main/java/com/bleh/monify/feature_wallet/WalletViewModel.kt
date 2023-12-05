@@ -47,7 +47,7 @@ class WalletViewModel @Inject constructor(
 
     private fun getWallets () {
         viewModelScope.launch {
-            walletDao.getWallets().flowOn(Dispatchers.IO).collect { walletList ->
+            walletDao.getWallets(currentUser!!.userId).flowOn(Dispatchers.IO).collect { walletList ->
                 _state.update {
                     it.copy(wallets = walletList)
                 }
@@ -57,7 +57,7 @@ class WalletViewModel @Inject constructor(
 
     private fun getSum() {
         viewModelScope.launch {
-            walletDao.walletSum().flowOn(Dispatchers.IO).collect { sum ->
+            walletDao.walletSum(currentUser!!.userId).flowOn(Dispatchers.IO).collect { sum ->
                 _state.update {
                     it.copy(totalNominal = sum)
                 }

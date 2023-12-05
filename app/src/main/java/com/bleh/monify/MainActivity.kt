@@ -46,33 +46,33 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    @Inject
-    lateinit var appDatabase: AppDatabase
-    @Inject
-    lateinit var baseDao: BaseDao
-    @Inject
-    lateinit var userDao: UserDao
-    @Inject
-    lateinit var walletDao: WalletDao
-    @Inject
-    lateinit var transactionDao: TransactionDao
-    @Inject
-    lateinit var categoryDao: CategoryDao
+//    @Inject
+//    lateinit var appDatabase: AppDatabase
+//    @Inject
+//    lateinit var baseDao: BaseDao
+//    @Inject
+//    lateinit var userDao: UserDao
+//    @Inject
+//    lateinit var walletDao: WalletDao
+//    @Inject
+//    lateinit var transactionDao: TransactionDao
+//    @Inject
+//    lateinit var categoryDao: CategoryDao
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        lifecycleScope.launch {
-            appDatabase.clearAllTables()
-            baseDao.deleteAllPrimaryKeys()
-            val mockData = MockData(
-                userDao = userDao,
-                walletDao = walletDao,
-                transactionDao = transactionDao,
-                categoryDao = categoryDao
-            )
-            mockData.insertMockData()
-        }
+//        lifecycleScope.launch {
+//            appDatabase.clearAllTables()
+//            baseDao.deleteAllPrimaryKeys()
+//            val mockData = MockData(
+//                userDao = userDao,
+//                walletDao = walletDao,
+//                transactionDao = transactionDao,
+//                categoryDao = categoryDao
+//            )
+//            mockData.insertMockData()
+//        }
 
         setContent {
             val navController = rememberNavController()

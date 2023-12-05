@@ -5,6 +5,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.bleh.monify.R
 import com.bleh.monify.core.daos.BudgetDao
 import com.bleh.monify.core.daos.CategoryDao
 import com.bleh.monify.core.daos.TransactionDao
@@ -12,6 +13,7 @@ import com.bleh.monify.core.daos.WalletDao
 import com.bleh.monify.core.entities.Category
 import com.bleh.monify.core.entities.TransactionEntity
 import com.bleh.monify.core.entities.Wallet
+import com.bleh.monify.core.enums.CategoryType
 import com.bleh.monify.core.pojos.TransactionCategoryWallet
 import com.bleh.monify.feature_auth.GoogleAuthClient
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -67,16 +69,12 @@ class BookViewModel @Inject constructor(
     private val currentUser = googleAuthClient.getLoggedInUser()
 
     init {
-        getTransactions()
-        getCategories()
-        getWallets()
-        getPositiveSum()
-        getNegativeSum()
+        getAll()
     }
 
     private fun getTransactions() {
         viewModelScope.launch {
-            transactionDao.getTransactionCategoryWallets().flowOn(Dispatchers.IO).collect { transactionList ->
+            transactionDao.getTransactionCategoryWalletsByString(state.value.searchState, currentUser!!.userId).flowOn(Dispatchers.IO).collect { transactionList ->
                 _state.update {
                     it.copy(transactionList = transactionList)
                 }
@@ -86,7 +84,7 @@ class BookViewModel @Inject constructor(
 
     private fun getCategories() {
         viewModelScope.launch {
-            categoryDao.getCategories().flowOn(Dispatchers.IO).collect { categoryList ->
+            categoryDao.getCategories(currentUser!!.userId).flowOn(Dispatchers.IO).collect { categoryList ->
                 _state.update {
                     it.copy(categoryList = categoryList)
                 }
@@ -96,7 +94,7 @@ class BookViewModel @Inject constructor(
 
     private fun getWallets() {
         viewModelScope.launch {
-            walletDao.getWallets().flowOn(Dispatchers.IO).collect { walletList ->
+            walletDao.getWallets(currentUser!!.userId).flowOn(Dispatchers.IO).collect { walletList ->
                 _state.update {
                     it.copy(walletList = walletList)
                 }
@@ -108,7 +106,7 @@ class BookViewModel @Inject constructor(
         viewModelScope.launch {
             val endDate = LocalDate.now()
             val startDate = endDate.minusDays(30)
-            transactionDao.sumOfPositiveInRange(startDate, endDate).flowOn(Dispatchers.IO).collect { sum ->
+            transactionDao.sumOfPositiveInRange(startDate, endDate, currentUser!!.userId).flowOn(Dispatchers.IO).collect { sum ->
                 _state.update {
                     it.copy(positiveSum = sum)
                 }
@@ -120,7 +118,7 @@ class BookViewModel @Inject constructor(
         viewModelScope.launch {
             val endDate = LocalDate.now()
             val startDate = endDate.minusDays(30)
-            transactionDao.sumOfNegativeInRange(startDate, endDate).flowOn(Dispatchers.IO).collect { sum ->
+            transactionDao.sumOfNegativeInRange(startDate, endDate, currentUser!!.userId).flowOn(Dispatchers.IO).collect { sum ->
                 _state.update {
                     it.copy(negativeSum = sum)
                 }
@@ -128,7 +126,15 @@ class BookViewModel @Inject constructor(
         }
     }
 
-    fun updateSearchState (search: String) {
+    private fun getAll() {
+        getTransactions()
+        getCategories()
+        getWallets()
+        getPositiveSum()
+        getNegativeSum()
+    }
+
+    fun updateSearchState(search: String) {
         _state.update {
             it.copy(searchState = search)
         }
@@ -261,6 +267,7 @@ class BookViewModel @Inject constructor(
                 if (state.value.transactionType == 2 && state.value.admin.isEmpty()) {
                     throw Exception("Harus memasukkan admin")
                 }
+                Log.d("BookViewModel", "upsertTransaction: ${state.value.transactionType}")
                 val balance = state.value.nominal.toDouble() * if (state.value.transactionType == 1) -1 else 1
                 transactionDao.upsertTransaction(
                     TransactionEntity(
@@ -280,6 +287,7 @@ class BookViewModel @Inject constructor(
                 if (state.value.isEdit) {
                     value = balance - state.value.oldNominal
                 }
+                Log.d("BookViewModel", "upsertTransaction: ${state.value.transactionType}")
                 if (state.value.transactionType == 2) {
                     walletDao.addWalletBalance(state.value.walletSourceId, -value)
                     walletDao.addWalletBalance(state.value.walletDestinationId!!, value)
@@ -299,6 +307,12 @@ class BookViewModel @Inject constructor(
                     )
                 } else {
                     walletDao.addWalletBalance(state.value.walletSourceId, value)
+                }
+                Log.d("BookViewModel", "upsertTransaction: ${state.value.transactionType}")
+                if (state.value.transactionType == 1) {
+                    Log.d("BookViewModel", "upsertTransaction: $value")
+                    budgetDao.addWeeklyUsed(state.value.selectedCategoryId!!, -value)
+                    budgetDao.addMonthlyUsed(state.value.selectedCategoryId!!, -value)
                 }
                 Toast.makeText(context, "Transaction Saved", Toast.LENGTH_SHORT).show()
             } catch (e: Exception) {

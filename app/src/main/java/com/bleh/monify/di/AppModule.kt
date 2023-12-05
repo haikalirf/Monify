@@ -2,6 +2,8 @@ package com.bleh.monify.di
 
 import android.content.Context
 import androidx.room.Room
+import androidx.room.RoomDatabase
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.bleh.monify.core.daos.BudgetDao
 import com.bleh.monify.core.daos.CategoryDao
 import com.bleh.monify.core.daos.TransactionDao
@@ -9,6 +11,7 @@ import com.bleh.monify.core.daos.UserDao
 import com.bleh.monify.core.daos.WalletDao
 import com.bleh.monify.core.daos.BaseDao
 import com.bleh.monify.core.database.AppDatabase
+import com.bleh.monify.core.helper.ioThread
 import com.bleh.monify.feature_auth.GoogleAuthClient
 import com.google.android.gms.auth.api.identity.Identity
 import dagger.Module
@@ -45,7 +48,6 @@ object AppModule {
             .allowMainThreadQueries()
             .build()
     }
-    //TODO remove main thread query
 
     @Provides
     @Singleton

@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
 data class MoreState(
-    val profileEmail: String = "testemail@gmail.com",
+    val profileEmail: String = "",
     val profileImage: Int = R.drawable.default_profile_image,
 )
 
@@ -21,9 +21,13 @@ class MoreViewModel @Inject constructor(
     private val _state = MutableStateFlow(MoreState())
     val state = _state.asStateFlow()
 
-    fun updateProfileEmailState (name: String) {
+    init {
+        getEmail()
+    }
+
+    private fun getEmail() {
         _state.update {
-            it.copy(profileEmail = name)
+            it.copy(profileEmail = authUiClient.getLoggedInUser()!!.email?: "")
         }
     }
 
